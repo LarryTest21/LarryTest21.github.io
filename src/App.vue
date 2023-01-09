@@ -106,7 +106,6 @@ const getWeather = () => {
     });
   });
 };
-
 function currentTime() {
   var date = new Date();
   var hh = date.getHours() as number | string;
