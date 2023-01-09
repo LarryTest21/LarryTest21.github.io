@@ -1,0 +1,211 @@
+@import "./base.css";
+#app {
+  height: 100%;
+  width: 100%;
+  margin: 0 auto;
+  font-weight: normal;
+}
+
+header {
+  position: fixed;
+  width: 100%;
+  height: 70px;
+  *border-radius: 70px 0 0 70px;
+  overflow: hidden;
+  z-index: 10;
+  background-color: var(--color-nav-bg);
+}
+header .wrapper {
+  height: 100%;
+  width: 100%;
+}
+
+nav {
+  height: 100%;
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease-out;
+}
+nav .nav-links {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+nav .nav-links a {
+  line-height: normal;
+  font-size: 1.7rem;
+  height: 100%;
+  padding: 0 2rem;
+  text-transform: uppercase;
+  font-family: Chango;
+  text-decoration: none;
+  transition: font 0.1s, background-color 0.2s, box-shadow 0.4s;
+  overflow: hidden;
+}
+nav .nav-links a li {
+  list-style-type: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  transition: all 0.2s;
+}
+nav .nav-links a:first-child {
+  padding: 0;
+  position: absolute;
+  left: 0;
+}
+nav .nav-links a:first-child:hover {
+  background-color: transparent;
+}
+nav a.router-link-exact-active span {
+  transform: scale(1.1);
+}
+nav a:hover span {
+  transform: scale(1.1);
+}
+
+nav a {
+  color: var(--color-nav-txt);
+}
+nav a::after {
+  content: "";
+  height: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  transform: translateX(-32px);
+  box-shadow: 0px 2px 10px 5px black;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+nav a:hover::after {
+  opacity: 1;
+}
+nav a:hover {
+  background-color: var(--vt-c-nav-text-bg-hover);
+  color: var(--vt-c-nav-text-hover);
+}
+nav a:first-child:hover {
+  background-color: transparent;
+  box-shadow: 0px 0 0 0 var(--vt-c-nav-text-bg-hover);
+}
+nav a:first-child {
+  background-color: transparent;
+}
+nav a:first-child::after {
+  box-shadow: 0px 0 0 0;
+}
+nav a.router-link-exact-active:first-child {
+  background-color: transparent;
+}
+nav a.router-link-exact-active:first-child:hover {
+  background-color: transparent;
+}
+nav a.router-link-exact-active {
+  color: var(--vt-c-nav-text-active);
+  background-color: var(--vt-c-nav-text-bg-hover);
+}
+nav a.router-link-exact-active::after {
+  content: "";
+  height: 100%;
+  position: absolute;
+  top: 0;
+  transform: translateX(-32px);
+  box-shadow: 0px 0px 5px 2px black;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.content-wrapper {
+  position: relative;
+  height: calc(100vh - 70px);
+  bottom: -70px;
+}
+
+.theme-changer-wrapper {
+  height: 100%;
+  width: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 70px;
+}
+
+.theme-changer {
+  position: relative;
+  right: 0;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.button {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgb(1, 67, 131);
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: rgb(235, 235, 235);
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: rgb(235, 235, 235);
+}
+
+input:checked + .slider:before {
+  background-color: rgb(0, 54, 107);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px rgb(1, 67, 131);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+@media (min-width: 1024px) {
+  .nav-logo {
+    position: relative;
+    left: 0;
+    height: 100%;
+  }
+  .nav-logo .logo {
+    height: 70px;
+    position: relative;
+    padding: 2px;
+  }
+}/*# sourceMappingURL=main.css.map */
