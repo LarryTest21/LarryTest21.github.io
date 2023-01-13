@@ -48,7 +48,6 @@ import $ from "jquery";
 const theme_checked = ref(false);
 const show = ref(false);
 const time = ref([] as unknown as number | string);
-const weathertime = ref([] as unknown as number | string);
 const weatherHov = ref(false);
 const timeWeatherUp = ref(false);
 

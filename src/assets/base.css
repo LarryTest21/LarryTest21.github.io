@@ -3,91 +3,68 @@ IMPORT FONTS
 ------------*/
 @import url("https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 @import url("http://fonts.cdnfonts.com/css/montserrat?styles=17402,17405,17395,17398,17400,17403,17391,17393,17389");
-
 @font-face {
   font-family: MyErosion;
   src: url("fonts/erosion/erosion.eot");
-  src: url("fonts/erosion/erosion.eot?#iefix") format("eot"),
-    url("fonts/erosion/erosion.woff") format("woff"),
-    url("fonts/erosion/erosion.ttf") format("truetype");
+  src: url("fonts/erosion/erosion.eot?#iefix") format("eot"), url("fonts/erosion/erosion.woff") format("woff"), url("fonts/erosion/erosion.ttf") format("truetype");
   font-weight: "normal";
 }
-
 @font-face {
   font-family: Chango;
   src: url("fonts/chango/chango.eot");
-  src: url("fonts/chango/chango.eot?#iefix") format("eot"),
-    url("fonts/chango/chango.woff") format("woff"),
-    url("fonts/chango/chango.ttf") format("truetype");
+  src: url("fonts/chango/chango.eot?#iefix") format("eot"), url("fonts/chango/chango.woff") format("woff"), url("fonts/chango/chango.ttf") format("truetype");
   font-weight: "normal";
 }
-
 @font-face {
   font-family: Pony;
   src: url("fonts/icialpony/iCielPony.eot");
-  src: url("fonts/icialpony/iCielPony?#iefix") format("eot"),
-    url("fonts/icialpony/iCielPony.woff") format("woff"),
-    url("fonts/icialpony/iCielPony") format("truetype");
+  src: url("fonts/icialpony/iCielPony?#iefix") format("eot"), url("fonts/icialpony/iCielPony.woff") format("woff"), url("fonts/icialpony/iCielPony") format("truetype");
   font-weight: "normal";
 }
-
 @font-face {
   font-family: Dink;
   src: url("fonts/dink/dink.eot");
-  src: url("fonts/dink/dink.eot?#iefix") format("eot"),
-    url("fonts/dink/dink.woff") format("woff"),
-    url("fonts/dink/dink.ttf") format("truetype");
+  src: url("fonts/dink/dink.eot?#iefix") format("eot"), url("fonts/dink/dink.woff") format("woff"), url("fonts/dink/dink.ttf") format("truetype");
   font-weight: "normal";
 }
-
 @font-face {
   font-family: DirtyEgo;
   src: url("fonts/dirtyego/DirtyEgo.eot");
-  src: url("fonts/dirtyego/DirtyEgo.eot?#iefix") format("eot"),
-    url("fonts/dirtyego/DirtyEgo.woff") format("woff"),
-    url("fonts/dirtyego/DirtyEgo.ttf") format("truetype");
+  src: url("fonts/dirtyego/DirtyEgo.eot?#iefix") format("eot"), url("fonts/dirtyego/DirtyEgo.woff") format("woff"), url("fonts/dirtyego/DirtyEgo.ttf") format("truetype");
   font-weight: "normal";
 }
-
 @font-face {
   font-family: Ruck;
   src: url("fonts/ruck/Rueckwarzsalto.eot");
-  src: url("fonts/ruck/Rueckwarzsalto.eot?#iefix") format("eot"),
-    url("fonts/ruck/Rueckwarzsalto.woff") format("woff"),
-    url("fonts/ruck/Rueckwarzsalto.ttf") format("truetype");
+  src: url("fonts/ruck/Rueckwarzsalto.eot?#iefix") format("eot"), url("fonts/ruck/Rueckwarzsalto.woff") format("woff"), url("fonts/ruck/Rueckwarzsalto.ttf") format("truetype");
   font-weight: "normal";
 }
-
 @font-face {
   font-family: Amateur;
   src: url("fonts/amateur/amateur.eot");
-  src: url("fonts/amateur/amateur.eot?#iefix") format("eot"),
-    url("fonts/amateur/amateur.woff") format("woff"),
-    url("fonts/amateur/amateur.ttf") format("truetype");
+  src: url("fonts/amateur/amateur.eot?#iefix") format("eot"), url("fonts/amateur/amateur.woff") format("woff"), url("fonts/amateur/amateur.ttf") format("truetype");
   font-weight: "normal";
 }
-
 @font-face {
   font-family: Gatintas;
   src: url("fonts/gatintas/fc779a6417a9c7001bdd57ff99fa0d36.eot");
-  src: url("fonts/gatintas/fc779a6417a9c7001bdd57ff99fa0d36.eot?#iefix")
-      format("embedded-opentype"),
-    url("fonts/gatintas/fc779a6417a9c7001bdd57ff99fa0d36.woff2") format("woff2"),
-    url("fonts/gatintas/fc779a6417a9c7001bdd57ff99fa0d36.woff") format("woff"),
-    url("fonts/gatintas/fc779a6417a9c7001bdd57ff99fa0d36.ttf")
-      format("truetype");
+  src: url("fonts/gatintas/fc779a6417a9c7001bdd57ff99fa0d36.eot?#iefix") format("embedded-opentype"), url("fonts/gatintas/fc779a6417a9c7001bdd57ff99fa0d36.woff2") format("woff2"), url("fonts/gatintas/fc779a6417a9c7001bdd57ff99fa0d36.woff") format("woff"), url("fonts/gatintas/fc779a6417a9c7001bdd57ff99fa0d36.ttf") format("truetype");
   font-weight: "normal";
 }
-
 :root {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
-  user-select: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
   font-size: 16px;
 }
+
 :root::-webkit-scrollbar {
   display: none; /* Safari and Chrome */
 }
+
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
   --vt-c-dark: linear-gradient(
@@ -99,17 +76,13 @@ IMPORT FONTS
   );
   /* DARK */
   --vt-c-text-dark: rgb(235, 235, 235);
-
   --vt-c-nav-dark-bg: rgb(235, 235, 235);
   --vt-c-nav-dark-text-bg: rgb(1, 72, 143);
   --vt-c-nav-dark: rgb(1, 43, 77);
   --vt-c-nav-dark-txt: rgb(3, 70, 124);
-
   --vt-c-nav-dark-text-hover: rgb(235, 235, 235);
-
   /* LIGHT */
   --vt-c-text-light: rgb(3, 70, 124);
-
   --vt-c-nav-light-bg: rgb(2, 67, 133);
   --vt-c-nav-light-txt: rgb(235, 235, 235);
   --vt-c-nav-light-text-hover: rgb(2, 67, 133);
@@ -122,6 +95,7 @@ IMPORT FONTS
   --color-background: rgb(2, 67, 133);
   --color-text: rgb(235, 235, 235);
 }
+
 .loader-wrapper.theme-light {
   --color-background: rgb(235, 235, 235);
   --color-text: rgb(3, 70, 124);
@@ -131,30 +105,27 @@ IMPORT FONTS
 #app.theme-dark {
   --color-background: var(--vt-c-dark);
   --color-text: var(--vt-c-text-dark);
-
   --color-nav-bg: var(--vt-c-nav-dark-bg);
   --color-nav-txt: var(--vt-c-nav-dark-txt);
   --vt-c-nav-text-hover: var(--vt-c-nav-dark-text-hover);
   --vt-c-nav-text-bg-hover: var(--vt-c-nav-dark-text-bg);
-
   --vt-c-nav-text-active-light: var(--vt-c-nav-text-active-dark);
 }
 
 #app.theme-light {
   --color-background: var(--vt-c-dark);
   --color-text: var(--vt-c-text-light);
-
   --color-nav-bg: var(--vt-c-nav-light-bg);
   --color-nav-txt: var(--vt-c-nav-light-txt);
   --vt-c-nav-text-hover: var(--vt-c-nav-light-text-hover);
   --vt-c-nav-text-bg-hover: var(--vt-c-nav-light-text-bg);
-
   --vt-c-nav-text-active: var(--vt-c-nav-text-active-light);
 }
 
 #app.theme-light {
   background-position: 100% 100%;
-  animation: gradient2 0.5s ease forwards;
+  -webkit-animation: gradient2 0.5s ease forwards;
+          animation: gradient2 0.5s ease forwards;
 }
 
 *,
@@ -178,9 +149,7 @@ body {
   background: var(--color-background);
   background-size: 250% 250%;
   line-height: 1.6;
-  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   font-size: 1rem;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -189,7 +158,8 @@ body {
 }
 
 #app.animdark {
-  animation: gradient 0.5s ease forwards;
+  -webkit-animation: gradient 0.5s ease forwards;
+          animation: gradient 0.5s ease forwards;
 }
 
 @-webkit-keyframes gradient {
@@ -200,7 +170,6 @@ body {
     background-position: 0% 0%;
   }
 }
-
 @keyframes gradient {
   0% {
     background-position: 100% 100%;
@@ -224,4 +193,4 @@ body {
   100% {
     background-position: 100% 100%;
   }
-} /*# sourceMappingURL=base.css.map */
+} /*# sourceMappingURL=base.css.map *//*# sourceMappingURL=base.css.map */

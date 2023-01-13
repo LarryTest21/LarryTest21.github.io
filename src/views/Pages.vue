@@ -64,7 +64,7 @@ import moment from "moment";
 const route = useRoute();
 
       const slug = route.params.newsSlug;
-      const postsUrl = "https://sub777.nhely.hu/wp-json/wp/v2/news";
+      const postsUrl = "http://localhost/wordpress/wp-json/wp/v2/news";
       const queryOptions = {
         slug: route.params.newsSlug,
         _embed: true,

@@ -48,15 +48,12 @@ import { ref, reactive } from "vue";
 import { onMounted } from "vue";
 import moment from "moment";
 
-const postsUrl = "https://localhost/wordpress/wp-json/wp/v2/news";
+const postsUrl = "http://sub777.nhely.hu/wp-json/wp/v2/news";
 const posts = ref([] as any);
-const postdate = ref([] as any);
 
 const isLoading = ref(false);
 const postsLoadOk = ref(false);
-const regex = /(<([^>]+)>)/gi;
 const errorCaught = ref(false);
-var featuredmedia = ref();
 
 var queryOptions = {
   _embed: true,
@@ -95,15 +92,17 @@ onMounted(async () => {
     <div class="wrapper">
       <div class="news-topper">
         <span>This is the News</span>
-          <div v-if="isLoading" class="loading">
-            <div>Loading...</div>
-          </div>
         <transition name="fadeLoading">
           <div class="errorCaught" v-if="errorCaught">
             There was an error loading news
           </div>
         </transition>
       </div>
+      <transition name="fadeLoading">
+        <div v-if="!isLoading" class="posts-loading">
+          <div></div>
+        </div>
+      </transition>
       <ul v-if="!isLoading" class="news-posts-ul" v-for="post in posts">
         <div class="posts-card">
           <a
@@ -111,10 +110,12 @@ onMounted(async () => {
             </router-link
           ></a>
           <img
+            v-if="post.featured_media != 0"
             class="posts-featuredimage"
             :src="post._embedded['wp:featuredmedia'][0].source_url"
             :alt="post.title.rendered"
           />
+          <img v-else src="@/assets/logos/favicon-big.png" />
           <div class="posts-date">
             <p>
               {{ moment(post.date).fromNow() + " " + "ago" }}
@@ -145,6 +146,7 @@ onMounted(async () => {
     .wrapper {
       margin: 20px 0;
       width: 100%;
+      max-height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -154,21 +156,42 @@ onMounted(async () => {
         justify-content: center;
         align-items: center;
       }
-      .loading {
-        position: relative;
-        display: inline-block;
-        width: 10%;
-        background-color: var(--color-nav-bg);
-        color: var(--color-nav-txt);
-        border-width: 20px;
-        border-radius: 30px;
-        font-size: 2rem;
-        text-align: center;
-        margin-bottom: 10px;
-        animation: blink 0.5s infinite;
+      .posts-loading {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 45vh;
+        left: 50vw;
         div {
-          font-family: Nunito;
-          font-weight: 900;
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          display: inline-block;
+          border-top: 10px solid var(--color-nav-bg);
+          border-right: 10px solid transparent;
+          box-sizing: border-box;
+          animation: rotation 1s linear infinite;
+        }
+        div::after {
+          content: "";
+          box-sizing: border-box;
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          border-left: 10px solid var(--color-nav-bg);
+          border-bottom: 10px solid transparent;
+          animation: rotation 0.5s linear infinite reverse;
+        }
+        @keyframes rotation {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
       }
       .errorCaught {
