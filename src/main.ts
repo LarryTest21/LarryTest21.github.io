@@ -1,17 +1,27 @@
+import { ref } from "vue";
 import { createPinia } from "pinia";
-import { createApp } from 'vue';
+import { createApp } from "vue";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
 
-import App from './App.vue';
-import router from './router';
+import App from "./App.vue";
+import router from "./router";
+import VueClickAway from "vue3-click-away";
 
-import './assets/main.css'
-
+import "./assets/main.css";
+import { onAuthStateChanged } from "firebase/auth";
 
 const pinia = createPinia();
-const app = createApp(App)
+const app = createApp(App);
 
-app.use(pinia)
 
-app.use(router)
+app.directive('visible', function(el, binding) {
+    el.style.visibility = !!binding.value ? 'visible' : 'hidden';
+});
 
-app.mount('body')
+app.use(pinia);
+
+app.use(router);
+app.use(VueClickAway);
+
+app.mount("body");

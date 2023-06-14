@@ -20,12 +20,12 @@
     height: 100%;
     width: 100%;
     font-family: Pony;
-    font-size: 50px;
     background: var(--color-background);
     color: var(--color-text);
     position: fixed;
     text-transform: uppercase;
-    z-index: 1;
+    z-index: 10;
+;
 
     .outer {
       background: rgba($color: #000000, $alpha: .5);
@@ -43,6 +43,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      scale:3;
     }
     .lds-ring {
       display: inline-block;
