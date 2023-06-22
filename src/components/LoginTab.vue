@@ -156,8 +156,7 @@ onMounted(() => {
         position: absolute;
         width: 20px;
         height: 25px;
-        left: 5px;
-        bottom: 17px;
+        left: 20px;
         stroke-width: 2px;
         fill: var(--color-nav-txt);
       }

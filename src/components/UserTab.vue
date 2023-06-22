@@ -84,9 +84,12 @@ const logOut = () => {
 <template>
   <div class="user-tab">
     <div class="usertab-top">
+      
       <div class="userPFP">
+        
         <transition name="modal">
-          <Modal v-if="modalActivation" :modalAnimation="modalAnimation" />
+          <Modal v-if="modalActivation" :modalAnimation="modalAnimation" :backgroundOpacity="1" />
+
         </transition>
         <img class="userPFP-img" v-bind:src="userPFP" />
       </div>
@@ -99,10 +102,10 @@ const logOut = () => {
       <router-link @click.native.prevent="userClick" to="/profile"
         >Profile</router-link
       >
-      <router-link @click.native.prevent="userClick" to="/createpost"
+      <router-link @click.native.prevent="userClick" to="/createpost/newPost"
         >Create Post</router-link
       >
-      <router-link @click.native.prevent="userClick" to="/editposts"
+      <router-link @click.native.prevent="userClick" to="/editpostslist"
         >Edit Posts</router-link
       >
       <a @click.stop.prevent="logOut()">Logout</a>
@@ -139,8 +142,10 @@ const logOut = () => {
     align-items: center;
     padding: 0.4rem;
     .userPFP {
+      position: relative;
       height: 70px;
       width: 70px;
+      overflow: hidden;
       .userPFP-img {
         height: 70px;
       }

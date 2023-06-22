@@ -1,12 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
-import $ from "jquery";
 import firebase from "firebase/compat/app";
-import {
-  getStorage,
-  ref as storageFBRef,
-  uploadBytesResumable,
-} from "firebase/storage";
+import VueCropper from "vue-cropperjs";
+import "cropperjs/dist/cropper.css";
 
 import db from "../firebase/firebaseInit";
 import VueDatePicker from "@vuepic/vue-datepicker";
@@ -14,16 +10,18 @@ import "@vuepic/vue-datepicker/dist/main.css";
 import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import Modal from "@/components/Modal.vue";
 import { updateCurrentUser } from "firebase/auth";
+import AskExcerpt from "@/components/CreatePostAskExcerpt.vue";
+import { Timestamp } from "firebase/firestore";
 
 const props = defineProps({
-  saveShow: Boolean,
   postTitle: String,
   postContent: String,
   postAuthor: String,
-  loadSaved: Boolean,
   postExcerpt: String,
-  postDate: Date,
+  postDate: Timestamp,
   checkSavedPost: Boolean,
+  rawImg: String,
+  postID: String,
 });
 
 const emit = defineEmits([
@@ -34,36 +32,56 @@ const emit = defineEmits([
   "changedImage",
 ]);
 const checkSavedPost = computed(() => props.checkSavedPost);
-const saveShow = computed(() => props.saveShow);
-const saveShow2 = ref(false);
+const saveShow = ref();
 
-const date = ref(new Date()) as any;
+const date = ref() as any;
 
 const postDate = ref();
 
-emit("postDate", date);
+const postID = ref() as any;
+const savedPostID = ref(false);
+watch(
+  () => props.postID,
+  (newValue) => {
+    postID.value = props.postID;
+    savedPostID.value = true;
+  }
+);
 
+watch(
+  () => props.postExcerpt,
+  (newValue) => {
+    excerpt.value = newValue;
+  }
+);
+
+watch(
+  () => props.postDate,
+  (newValue) => {
+    postDate.value = props.postDate;
+    date.value = new Date(props.postDate!.toDate());
+  }
+);
+date.value = new Date();
 const showPreview = () => {
   emit("showPreview", true);
 };
 
-watch(date, () => {
-  emit("postDate", date);
-});
+const postContent = ref(props.postContent);
+const postTitle = ref(props.postTitle);
+const propRawImg = computed(() => props.rawImg);
 
-const postAuthor = ref();
-
-var postContent = ref(props.postContent);
-const postTitle = ref();
-
-window.addEventListener("keydown", (e) => {
-  postTitle.value = props.postTitle;
-  console.log(postTitle.value);
+watch(propRawImg, (newValue) => {
+  if (newValue !== undefined || newValue !== null || newValue !== "") {
+    rawImg.value = newValue;
+    showCoverPreview.value = true;
+  }
 });
 
 const datePicker = ref();
 const fileUpload = ref() as any;
 const coverFile = ref() as any;
+const rawImg = ref();
 const rawImg2 = ref();
 
 const excerpt = ref();
@@ -76,7 +94,6 @@ const errorMsg = ref("");
 
 const changedImage = ref(false);
 watch(changedImage, () => {
-  console.log(changedImage.value);
   emit("changedImage", true);
 });
 
@@ -86,10 +103,10 @@ const onFileClick = (e) => {
   e.target.value = null;
 };
 
-const onFileSelect = (e) => {
-  coverFile.value = e.target.files[0];
+const onFileSelect = (file) => {
+  coverFile.value = file.target.files[0];
   changedImage.value = true;
-  saveShow2.value = true;
+  saveShow.value = true;
   const mime_type = ref();
   mime_type.value = coverFile.value.type;
   const validImageTypes = ["image/jpeg", "image/png"];
@@ -97,19 +114,91 @@ const onFileSelect = (e) => {
   if (validImageTypes.includes(mime_type.value)) {
     if (typeof FileReader === "function") {
       const reader = new FileReader();
+
       reader.onload = (event) => {
         if (coverFile.value) {
-          coverFile.value.replace(event.target?.result);
         }
         coverFile.value = event.target?.result;
       };
 
       reader.readAsDataURL(coverFile.value);
+      interface IResizeImageOptions {
+        maxSize: number;
+        file: File;
+      }
+      const resizeImage = (settings: IResizeImageOptions) => {
+        const file = settings.file;
+        const maxSize = settings.maxSize;
+        const reader = new FileReader();
+        const image = new Image();
+        const canvas = document.createElement("canvas");
+        const dataURItoBlob = (dataURI: string) => {
+          const bytes =
+            dataURI.split(",")[0].indexOf("base64") >= 0
+              ? atob(dataURI.split(",")[1])
+              : unescape(dataURI.split(",")[1]);
+          const mime = dataURI.split(",")[0].split(":")[1].split(";")[0];
+          const max = bytes.length;
+          const ia = new Uint8Array(max);
+          for (var i = 0; i < max; i++) ia[i] = bytes.charCodeAt(i);
+          return new Blob([ia], { type: mime });
+        };
+        const resize = () => {
+          let width = image.width;
+          let height = image.height;
 
-      reader.onload = () => {
-        rawImg2.value = reader.result;
-        showCoverPreview.value = true;
+          if (width > height) {
+            if (width > maxSize) {
+              height *= maxSize / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width *= maxSize / height;
+              height = maxSize;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext("2d")!.drawImage(image, 0, 0, width, height);
+          let dataUrl = canvas.toDataURL("image/png");
+          return dataURItoBlob(dataUrl);
+        };
+
+        return new Promise((ok, no) => {
+          if (!file.type.match(/image.*/)) {
+            no(new Error("Not an image"));
+            return;
+          }
+
+          reader.onload = (readerEvent: any) => {
+            image.onload = () => ok(resize());
+            image.src = readerEvent.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
       };
+
+      // START: preview resized
+      resizeImage({ file: coverFile.value, maxSize: 300 })
+        .then((resizedImage) => {
+          var blob = resizedImage;
+
+          var reader = new FileReader() as any;
+
+          reader.readAsDataURL(blob);
+          reader.onloadend = function () {
+            var base64data = reader.result;
+            rawImg.value = base64data;
+            showCoverPreview.value = true;
+            return;
+          };
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+      // END: preview resized
     } else {
       alert("Sorry, FileReader API not supported");
     }
@@ -117,84 +206,162 @@ const onFileSelect = (e) => {
     alert("Select an image file (png or jpeg)");
   }
 };
-
 const btnClose = (e) => {
   fileUpload.value = "";
   showCoverPreview.value = false;
-  saveShow2.value = true;
-  rawImg2.value = null;
+  saveShow.value = true;
+  rawImg.value = null;
 };
 const savedObj = ref({});
 
-const loadSaved = computed(() => props.loadSaved);
+const excerptDialogue = ref(false);
 
-watch(loadSaved, () => {
-  console.log("loadsaved changed");
-  if (loadSaved.value) {
-    console.log("excerpt reading" + " " + loadSaved.value);
-    var savedPost = localStorage.getItem("savedPost") as string;
-    var parsedSaved = JSON.parse(savedPost);
+const excerptYes = () => {
+  var strippedHtml = postContent.value!.replace(/<[^>]+>/g, "");
+  excerpt.value = strippedHtml.slice(0, 70);
+  excerptDialogue.value = false;
+};
+const excerptNo = () => {
+  excerptDialogue.value = false;
+};
 
-    date.value = parsedSaved.postDate;
+const modalLoadingMessage = ref();
+const modalAnimation = ref(false);
+
+const modalClickAway = () => {
+  modalActive.value = false;
+};
+
+const countExcerpt = () => {
+  var maxlength = 70;
+  var currentLength = excerpt.value.length;
+
+  if (currentLength >= maxlength) {
+    characterCounter.value = "0 characters left";
+    characterCounterRef.value.style.color = "red";
+  } else {
+    characterCounterRef.value.style.color = "var(--color-nav-txt)";
+    characterCounter.value = maxlength - currentLength + " characters left";
   }
+  excerptDialogue.value = false;
+};
+
+watch(excerpt, () => {
+  countExcerpt();
 });
 
 const savePost = () => {
-  modalActive.value = true;
-  const firebaseAuth = firebase.auth().currentUser;
-  const dataBase = db.collection("users").doc(firebaseAuth?.uid);
+  function actualSaving() {
+    modalActive.value = true;
+    modalAnimation.value = true;
+    modalLoadingMessage.value = "Saving";
+    const firebaseAuth = firebase.auth().currentUser;
+    const dataBase = db.collection("users").doc(firebaseAuth?.uid);
 
-  savedObj.value = {
-    postTitle: props.postTitle || null,
-    postDate: date.value.toString(),
-    postAuthor: props.postAuthor,
-    postContent: props.postContent || null,
-    postExcerpt: excerpt.value || null,
-    coverImage: rawImg2.value || null,
-  };
-  console.log(savedObj.value);
-  dataBase
-    .update({
-      savedPost: savedObj.value,
-    })
-    .catch((error) => {
-      error.value = true;
-      errorMsg.value = error.message;
-    })
-    .then(() => {
-      setTimeout(() => {
-        modalActive.value = false;
-      }, 300);
+    savedObj.value = {
+      postTitle: props.postTitle || null,
+      postDate: date.value.toString(),
+      postAuthor: props.postAuthor,
+      postContent: props.postContent || null,
+      postExcerpt: excerpt.value || null,
+      coverImage: rawImg.value || null,
+    };
+    dataBase
+      .update({
+        savedPost: savedObj.value,
+      })
+      .catch((error) => {
+        error.value = true;
+        errorMsg.value = error.message;
+      })
+      .then(() => {
+        setTimeout(() => {
+          modalAnimation.value = false;
+
+          modalLoadingMessage.value = "Save Successfull";
+        }, 600);
+      })
+      .then(() => {
+        setTimeout(() => {
+          modalActive.value = false;
+        }, 1500);
+      });
+  }
+
+  if (excerpt.value == undefined || excerpt.value == "") {
+    excerptDialogue.value = true;
+    watch(excerptDialogue, () => {
+      if (!excerptDialogue.value) {
+        actualSaving();
+      }
     });
+  } else {
+    actualSaving();
+  }
 };
 
 const uploadPost = async () => {
   if (postTitle.value == undefined) {
     error.value = true;
     errorMsg.value = "Give the post a title";
-    alert("no title");
+    modalActive.value = error.value;
+    modalLoadingMessage.value = errorMsg.value;
   } else if (
     postContent.value == undefined ||
     postContent.value == "<p><br></p>"
   ) {
     error.value = true;
     errorMsg.value = "Post content can not be empty";
-    alert("no content");
+    modalActive.value = error.value;
+    modalLoadingMessage.value = errorMsg.value;
+  } else if (excerpt.value == undefined) {
+    error.value = true;
+    errorMsg.value = "Excerpt can not be empty";
+    modalActive.value = error.value;
+    modalLoadingMessage.value = errorMsg.value;
+  } else if (rawImg.value == undefined) {
+    error.value = true;
+    errorMsg.value = "Cover Photo is needed";
+    modalActive.value = error.value;
+    modalLoadingMessage.value = errorMsg.value;
   } else {
-    const dataBase = db.collection("blogposts").doc(postTitle.value);
+    modalActive.value = true;
+    modalLoadingMessage.value = "Uploading";
+    modalAnimation.value = true;
+    if (postID.value === undefined) {
+      postID.value = new Date().valueOf().toString();
+    }
+
+    const dataBase = db.collection("blogposts").doc(postID.value);
     const coverImage = ref();
     if (rawImg2.value == undefined) {
       coverImage.value = null;
     } else {
       coverImage.value = rawImg2.value;
     }
-    await dataBase.set({
-      coverImage: coverImage.value,
-      postDate: date.value,
-      postTitle: postTitle.value,
-      postContent: postContent.value,
-      postExcerpt: excerpt.value,
-    });
+    await dataBase
+      .set({
+        postID: postID.value,
+        coverImage: rawImg.value,
+        postDate: date.value,
+        postAuthor: props.postAuthor,
+        postTitle: postTitle.value,
+        postContent: postContent.value,
+        postExcerpt: excerpt.value,
+        lastUpload: new Date()
+      })
+      .then(() => {
+        modalLoadingMessage.value = "Successfull Upload";
+        modalAnimation.value = false;
+      })
+      .catch((error) => {
+        modalLoadingMessage.value = error.msg;
+      })
+      .then(() => {
+        setTimeout(() => {
+          modalActive.value = false;
+        }, 800);
+      });
   }
 };
 
@@ -216,7 +383,10 @@ watch(checkSavedPost, () => {
         .then(() => {
           savedPost.value = userData.value.savedPost;
 
-          if (Object.keys(savedPost.value).length !== 0) {
+          if (
+            Object.keys(savedPost.value).length !== 0 ||
+            Object.keys(savedPost.value) !== null
+          ) {
             emit("postContent", savedPost.value.postContent);
             emit("postTitle", savedPost.value.postTitle);
             excerpt.value = savedPost.value.postExcerpt;
@@ -224,7 +394,7 @@ watch(checkSavedPost, () => {
             date.value = postDate.value;
             if (savedPost.value.coverImage === null) {
             } else {
-              rawImg2.value = savedPost.value.coverImage;
+              rawImg.value = savedPost.value.coverImage;
               showCoverPreview.value = true;
             }
           }
@@ -233,40 +403,105 @@ watch(checkSavedPost, () => {
   }
 });
 
-const saveDateButton = () => {
-  saveShow2.value = true;
+watch(
+  () => [props.postContent, props.postTitle],
+  ([postC, postT]) => {
+    postContent.value = props.postContent;
+    postTitle.value = props.postTitle;
+
+    if (postC !== undefined || postC !== "<p><br></p>") {
+      saveShow.value = true;
+    }
+    if (postT !== "") {
+      saveShow.value = true;
+    }
+
+    if (
+      (postC === undefined && postT === "") ||
+      (postC === "<p><br></p>" && postT === "") ||
+      (postC === undefined && postT === undefined) ||
+      (postC === "<p><br></p>" && postT === "") ||
+      (postC === "<p><br></p>" && postT === undefined)
+    ) {
+      saveShow.value = false;
+    }
+  }
+);
+
+const autoFill = ref(false);
+const autoFillLeaveCheck = ref(false);
+const autoFillHover = () => {
+  setTimeout(() => {
+    if (!autoFillLeaveCheck.value) {
+      autoFill.value = true;
+    }
+  }, 900);
 };
 
-onMounted(() => {
-  $("textarea").on("input", function () {
-    var maxlength = $("textarea").attr("maxlength");
-    var currentLength = $("textarea").val().length;
+const autoFillLeave = () => {
+  autoFillLeaveCheck.value = true;
+  setTimeout(() => {
+    autoFillLeaveCheck.value = false;
+  }, 500);
+  autoFill.value = false;
+};
+const saveDateButton = () => {
+  saveShow.value = true;
+};
+const handler = () => {
+  if (excerpt.value !== "") {
+    saveShow.value = true;
+  } else if (
+    (postTitle.value === "" &&
+      postContent.value === "<p><br></p>" &&
+      excerpt.value === "") ||
+    (postTitle.value === undefined &&
+      postContent.value === "<p><br></p>" &&
+      excerpt.value === "") ||
+    (postTitle.value === undefined &&
+      postContent.value === undefined &&
+      excerpt.value === "") ||
+    (postTitle.value === "" &&
+      postContent.value === undefined &&
+      excerpt.value === "")
+  ) {
+    saveShow.value = false;
+  }
+};
 
-    if (currentLength >= maxlength) {
-      console.log("You have reached the maximum number of characters.");
-      characterCounter.value = "0 characters left";
-      characterCounterRef.value.style.color = "red";
-    } else {
-      console.log(maxlength - currentLength + " chars left");
-      characterCounterRef.value.style.color = "var(--color-nav-txt)";
-      characterCounter.value = maxlength - currentLength + " characters left";
-    }
-  });
-});
+const autoFillExcerpt = () => {
+  var strippedHtml = postContent.value!.replace(/<[^>]+>/g, "");
+  excerpt.value = strippedHtml.slice(0, 70);
+};
+onMounted(() => {});
 </script>
 
 <template>
   <transition name="modal">
-    <Modal
-      v-if="modalActive"
-      :modalAnimation="true"
-      :modalLoadingMessage="'Saving'"
+    <AskExcerpt
+      v-if="excerptDialogue"
+      class="askexcerpt"
+      @button-no="excerptNo"
+      @button-yes="excerptYes"
     />
   </transition>
+  <transition name="modal">
+    <Modal
+      class="modal"
+      v-if="modalActive"
+      :modalAnimation="modalAnimation"
+      :modalLoadingMessage="modalLoadingMessage"
+      v-click-away="modalClickAway"
+    />
+  </transition>
+
   <div class="side-container">
     <div class="date-picker">
+      <div class="author-wrapper">
+        <label class="label">Writing as:</label>
+        <label class="author"> {{ props.postAuthor }}</label>
+      </div>
       <label class="date">Post Date</label>
-      <label>{{ postAuthor }}</label>
       <VueDatePicker
         @update:model-value="saveDateButton"
         ref="datePicker"
@@ -285,7 +520,7 @@ onMounted(() => {
       <label>Cover Photo</label>
       <div class="cover-preview-wrapper" value="Preview Cover" key="1">
         <div class="cover-image-wrapper">
-          <img :src="rawImg2" alt="" key="2" v-if="showCoverPreview" />
+          <img :src="rawImg" alt="" key="2" v-if="showCoverPreview" />
         </div>
         <div
           v-if="showCoverPreview"
@@ -321,19 +556,33 @@ onMounted(() => {
         v-model="excerpt"
         maxlength="70"
         ref="excerptText"
+        @input="handler"
       />
+
       <div class="excerpt-counter">
+        <div class="autofill-hover" v-if="autoFill">
+          This will make the excerpt filled out with text from the editor to the
+          left
+        </div>
         <div
           ref="characterCounterRef"
           v-text="characterCounter"
           class="character-counter"
+        />
+
+        <input
+          type="button"
+          value="AutoFill"
+          @click="autoFillExcerpt"
+          @mouseover="autoFillHover"
+          @mouseleave="autoFillLeave"
         />
       </div>
     </div>
 
     <div class="btns">
       <transition name="save">
-        <div class="button-save" :class="{ active: saveShow || saveShow2 }">
+        <div class="button-save" v-if="saveShow">
           <input type="button" value="Save" @click="savePost" />
         </div>
       </transition>
@@ -356,6 +605,29 @@ onMounted(() => {
   border-radius: 10px;
   background: var(--color-nav-bg);
   cursor: pointer;
+}
+.askexcerpt {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  height: 400px;
+  width: 600px;
+  border-radius: 30px;
+  box-shadow: 2px 2px 5px 10px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
 }
 
 .side-container input[type="button"] {
@@ -406,6 +678,20 @@ onMounted(() => {
       margin: 0;
       left: 0;
     }
+    .author-wrapper {
+      font-family: Roboto Condensed;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      .label {
+        width: 100%;
+        left: 0;
+      }
+      .author {
+        width: 100%;
+        text-align: right;
+      }
+    }
   }
   .excerpt-wrapper {
     height: 100%;
@@ -414,6 +700,7 @@ onMounted(() => {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
     label {
       margin-bottom: 5px;
       width: 100%;
@@ -439,13 +726,42 @@ onMounted(() => {
       scroll-snap-align: end;
     }
     .excerpt-counter {
+      margin-top: 10px;
       width: 100%;
       display: flex;
-      flex-direction: column;
-      margin-left: 15px;
+      flex-direction: row;
       align-items: flex-start;
+      justify-content: center;
       gap: 10px;
       font-size: 0.8rem;
+
+      .autofill-hover {
+        font-size: 0.8rem;
+        position: absolute;
+        z-index: 99;
+        height: 100px;
+        width: 200px;
+        background-color: white;
+        padding: 10px;
+        margin: auto;
+        right: -190px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        box-shadow: 2px 2px 5px 3px rgba(0, 0, 0, 0.3);
+        border-radius: 10px;
+      }
+
+      input[type="button"] {
+        height: 20px;
+        font-size: 0.7rem;
+        width: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
     }
   }
   .cover-photo {
@@ -510,6 +826,7 @@ onMounted(() => {
         border-radius: 5px;
         border: solid 5px var(--color-nav-txt);
         border-radius: 10px;
+        overflow: hidden;
 
         img {
           width: 100%;
@@ -537,7 +854,6 @@ onMounted(() => {
       }
     }
     .button-save {
-      opacity: 0;
       transition: opacity 0.4s ease-in-out;
       input {
         background-color: red;
@@ -546,9 +862,6 @@ onMounted(() => {
       input:hover {
         background: rgba(114, 2, 2, 0.8) !important;
       }
-    }
-    .button-save.active {
-      opacity: 1;
     }
   }
 }

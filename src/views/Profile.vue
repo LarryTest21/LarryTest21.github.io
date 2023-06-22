@@ -7,16 +7,13 @@ import passwordSVG from "../components/icons/password.vue";
 import firebase from "firebase/compat/app";
 import db from "../firebase/firebaseInit";
 import "firebase/auth";
+import $ from "jquery";
 import EditProfilePicture from "../components/EditProfilePicture.vue";
 import Modal from "../components/Modal.vue";
 import { modalButtonActive } from "../store/modalButtonActive";
 import { profPicClose } from "../store/profPicClose";
 import { profPicChanged } from "@/store/profPicChanged";
-import {
-  ref as storageFBRef,
-  getStorage,
-  getBlob,
-} from "firebase/storage";
+import { ref as storageFBRef, getStorage, getBlob } from "firebase/storage";
 
 const modalActivation = ref(true);
 const modalButtonMessage = ref();
@@ -41,6 +38,22 @@ const userPFP = ref();
 const imgLoaded = ref(false);
 const userData = ref();
 const userPFPStored = ref();
+const Logo = new URL("../assets/logos/logo.svg", import.meta.url);
+const logoBase64 = ref();
+
+const toDataUrl = (url, callback) => {
+  var xhr = new XMLHttpRequest();
+  xhr.onload = function () {
+    var reader = new FileReader();
+    reader.onloadend = function () {
+      callback(reader.result);
+    };
+    reader.readAsDataURL(xhr.response);
+  };
+  xhr.open("GET", url);
+  xhr.responseType = "blob";
+  xhr.send();
+};
 
 firebase.auth().onAuthStateChanged((user) => {
   modalActivation.value = true;
@@ -62,6 +75,7 @@ firebase.auth().onAuthStateChanged((user) => {
         storage,
         "/" + userStorage + "/" + "avatar.png"
       );
+
       const convertBase64 = async () => {
         const blob = await getBlob(storageRef);
         var reader = new FileReader();
@@ -75,11 +89,37 @@ firebase.auth().onAuthStateChanged((user) => {
           return;
         };
       };
-      convertBase64().then(() => {
-        setTimeout(() => {
-          modalActivation.value = false;
-        }, 2000);
-      });
+
+      convertBase64()
+        .catch((error) => {
+          switch (error.code) {
+            case "storage/object-not-found":
+              toDataUrl(Logo, function (myBase64) {
+                console.log(myBase64); // myBase64 is the base64 string
+                userPFPStored.value = myBase64;
+                localStorage.setItem("avatar", myBase64);
+              });
+
+              break;
+            case "storage/unauthorized":
+              // User doesn't have permission to access the object
+              break;
+            case "storage/canceled":
+              // User canceled the upload
+              break;
+
+            // ...
+
+            case "storage/unknown":
+              // Unknown error occurred, inspect the server response
+              break;
+          }
+        })
+        .then(() => {
+          setTimeout(() => {
+            modalActivation.value = false;
+          }, 2000);
+        });
     };
 
     watch(picChanged, () => {
@@ -297,20 +337,11 @@ onMounted(() => {});
         />
       </transition>
 
-      <transition name="modal">
-        <Modal
-          v-if="modalActivation"
-          :modalAnimation="modalAnimation"
-          :loadingScale="2"
-          :modalLoadingMessage="modalLoadingMessage"
-          :modalButtonMessage="modalButtonMessage"
-          v-click-away="modalClickAwayFunction"
-        />
-      </transition>
+      
 
       <div class="profile-pic">
         <div class="prof-content">
-          <img v-bind:src="userPFP" @load="imgLoaded = !imgLoaded" />
+          <img v-bind:src="userPFP || Logo" @load="imgLoaded = !imgLoaded" />
           <input
             type="button"
             value="Change"
@@ -325,6 +356,17 @@ onMounted(() => {});
         v-click-away="closeError"
         :class="[pwOp ? '' : 'op']"
       >
+      <transition name="modal">
+        <Modal
+          class="modal"
+          v-if="modalActivation"
+          :modalAnimation="modalAnimation"
+          :loadingScale="2"
+          :modalLoadingMessage="modalLoadingMessage"
+          :modalButtonMessage="modalButtonMessage"
+          v-click-away="modalClickAwayFunction"
+        />
+      </transition>
         <div class="inputs">
           <div class="field">
             <div class="icon">
@@ -455,16 +497,16 @@ onMounted(() => {});
   }
 
   input {
-      margin-top: 5px;
-      padding: 5px;
-      font-family: Verdana;
-      font-weight: 700;
-      width: 100%;
-      background: transparent;
-      border: solid var(--color-nav-txt);
-      border-radius: 10px;
-      outline: none;
-    }
+    margin-top: 5px;
+    padding: 5px;
+    font-family: Verdana;
+    font-weight: 700;
+    width: 100%;
+    background: transparent;
+    border: solid var(--color-nav-txt);
+    border-radius: 10px;
+    outline: none;
+  }
   .form-wrap {
     position: relative;
     font-family: Chango;
@@ -478,6 +520,7 @@ onMounted(() => {});
     align-content: center;
     gap: 30px;
     border-radius: 30px;
+
     .error {
       display: flex;
       border-radius: 30px;
@@ -510,28 +553,25 @@ onMounted(() => {});
       left: 70px;
       background-color: var(--color-nav-bg);
       border-radius: 50%;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
       z-index: 2;
 
       .prof-content {
+        position: relative;
         height: 100%;
         width: 100%;
         display: flex;
         flex-direction: row;
-        align-items: center;
         gap: 10px;
 
         input[type="button"] {
+          position: absolute;
           display: flex;
           align-items: center;
           justify-content: center;
-          position: absolute;
           font-size: 0.8rem;
           padding: 0;
-          bottom: 20px;
           height: 30px;
+          bottom: 10px;
         }
       }
     }
@@ -550,6 +590,7 @@ onMounted(() => {});
       padding: 50px 50px 50px 50px;
       gap: 30px;
       transition: all 0.2s ease-in-out;
+      overflow:hidden;
 
       .inputs {
         display: flex;
@@ -639,8 +680,6 @@ onMounted(() => {});
       }
     }
 
-
-
     .icon {
       height: 25px;
       width: 25px;
@@ -656,6 +695,53 @@ onMounted(() => {});
     }
     img {
       width: 100px;
+    }
+  }
+}
+
+@media (max-width: 412px) {
+  input[type="button"] {
+    height: 200px;
+    width: 70%;
+  }
+  .profile-wrapper {
+    height: 100vh;
+    padding-top: 0;
+    justify-content: flex-end;
+    align-items: flex-end;
+    .form-wrap {
+      position: relative;
+      height: 100%;
+      width: 100%;
+      align-items: flex-end;
+      justify-content: flex-end;
+      .buttons {
+        position: absolute;
+        right: 0;
+        width: 50%;
+      }
+      .inputs-field-wrapper {
+        width: 100%;
+        height: 100%;
+        background-color: transparent !important;
+      }
+      .inputs-field-wrapper.op {
+        padding: 30px 30px 30px 30px;
+        position: relative;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        border-radius: 30px 30px 0 0;
+        .inputs {
+          font-size: 2rem;
+          width: 100%;
+          margin-top: 40px;
+          .field {
+            height: 100%;
+          }
+        }
+      }
     }
   }
 }

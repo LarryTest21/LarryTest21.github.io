@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { Timestamp } from "firebase/firestore";
 import { ref, onMounted } from "vue";
+import moment from "moment";
 
 const emit = defineEmits(["showPreview"]);
 
@@ -10,7 +12,7 @@ const showCoverPreviewFunction = () => {
 const props = defineProps({
   postTitle: String,
   postAuthor: String,
-  postDate: Object,
+  postDate: Timestamp,
   postContent: String,
 });
 
@@ -21,7 +23,7 @@ const postcontent = ref() as any;
 
 const postTitle = ref(props.postTitle) as any;
 const postAuthor = ref(props.postAuthor);
-const postDate = ref(props.postDate!) as any;
+const postDate = ref(new Date(props.postDate!.toDate())) as any;
 const postContent = ref(props.postContent) as any;
 
 //DATE FUNCTIONS
@@ -34,8 +36,7 @@ const options = {
   minute: "numeric",
 };
 
-const newDate = ref(postDate.value.toLocaleString("en-US", options));
-
+const newDate = moment(postDate.value).format("MMMM Do YYYY, h:mm:ss a");
 //GETTING AUTHOR NAME
 
 onMounted(() => {
@@ -201,14 +202,13 @@ input[type="button"]:active {
           border-radius: 30px;
           box-shadow: 2px 2px 5px 3px rgba(0, 0, 0, 0.3);
           display: table;
-          margin:0 auto;
+          margin: 0 auto;
         }
         img + blockquote {
           display: table;
-          margin:0 auto;
+          margin: 0 auto;
         }
       }
-
     }
   }
 }

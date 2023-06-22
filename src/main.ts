@@ -3,6 +3,7 @@ import { createPinia } from "pinia";
 import { createApp } from "vue";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
+import VueMultiselect from 'vue-multiselect'
 
 import App from "./App.vue";
 import router from "./router";
@@ -13,6 +14,8 @@ import { onAuthStateChanged } from "firebase/auth";
 
 const pinia = createPinia();
 const app = createApp(App);
+
+app.component('VueMultiselect', VueMultiselect);
 
 
 app.directive('visible', function(el, binding) {

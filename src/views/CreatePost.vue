@@ -12,20 +12,24 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import db from "../firebase/firebaseInit";
 import Dialogue from "@/components/SavedPostDialogue.vue";
-
-const saveShowButton = ref(false);
+import { useRoute } from "vue-router";
+import Multiselect from "vue-multiselect";
+import CreatePostSide from "@/components/CreatePostSide.vue";
 
 const postContent = ref();
-const postContentShow = ref(false);
-
-window.addEventListener("keydown", (e) => {});
 
 const postTitle = ref();
-const postTitleShow = ref(false);
 
 const savedDialogue = ref(false);
 
+const postID = ref();
+const postUploadTime = ref();
+
 const downIcon = ref() as any;
+const multiSelectSelected = ref([]);
+const multiSelectOptions = ["Blog", "Tournament", "Cup", "General"];
+
+
 
 const side = ref();
 const showPreview = ref(false);
@@ -50,6 +54,55 @@ const toolbarOptions = [
   ["clean"],
 ];
 
+const firebaseAuth = ref();
+const dataBaseUser = ref();
+const savedPost = ref();
+
+firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    firebaseAuth.value = firebase.auth().currentUser;
+    dataBaseUser.value = db.collection("users").doc(firebaseAuth.value?.uid);
+
+    dataBaseUser.value
+      .get()
+      .then((doc) => {
+        userData.value = doc.data();
+      })
+
+      .then(() => {
+        postAuthor.value =
+          userData.value.firstName + " " + userData.value.lastName;
+      });
+
+    if (user) {
+      if (route.params.createSlug == "newPost") {
+        const dataBase = db
+          .collection("users")
+          .doc(firebase.auth().currentUser?.uid);
+        dataBase
+          .get()
+          .then((doc) => {
+            userData.value = doc.data();
+          })
+
+          .then(() => {
+            savedPost.value = userData.value.savedPost;
+            if (savedPost.value !== undefined) {
+              if (Object.keys(savedPost.value).length !== 0) {
+                savedDialogue.value = true;
+              } else if (Object.keys(savedPost.value).length === 0) {
+              }
+            }
+          });
+      }
+    }
+  }
+});
+
+const userData = ref();
+const postAuthor = ref();
+const checkSavedPost = ref(false);
+
 const onShowPostPreview = () => {
   showPreview.value = false;
 };
@@ -67,75 +120,31 @@ const postTitleFn = function (params) {
   postTitle.value = params;
 };
 
-const loadSavedSide = ref(false);
-
 const dialogueYes = () => {
   checkSavedPost.value = true;
-
   savedDialogue.value = false;
 };
 
 const dialogueNo = () => {
   savedDialogue.value = false;
 };
-const dialogueDelete = async() => {
+const dialogueDelete = async () => {
+  savedDialogue.value = false;
 
-  const firebaseAuth = firebase.auth().currentUser;
-  const dataBase = db.collection("users").doc(firebaseAuth?.uid);
-  await dataBase
+  await dataBaseUser.value
     .update({
       savedPost: {},
     })
     .catch((error) => {
       error.value = true;
     });
-  savedDialogue.value = false;
 };
 
 //GETTING AUTHOR NAME
-const postAuthor = ref();
-const checkSavedPost = ref(false);
-
-firebase.auth().onAuthStateChanged((user) => {
-  const userData = ref();
-
-  const dataBase = db.collection("users").doc(firebase.auth().currentUser?.uid);
-  dataBase
-    .get()
-    .then((doc) => {
-      userData.value = doc.data();
-    })
-
-    .then(() => {
-      postAuthor.value =
-        userData.value.firstName + "" + userData.value.lastName;
-    });
-
-  const savedPost = ref();
-
-  if (user) {
-    const dataBase = db
-      .collection("users")
-      .doc(firebase.auth().currentUser?.uid);
-    dataBase
-      .get()
-      .then((doc) => {
-        userData.value = doc.data();
-      })
-
-      .then(() => {
-        savedPost.value = userData.value.savedPost;
-        console.log(checkSavedPost.value);
-
-        if (Object.keys(savedPost.value).length !== 0) {
-
-          savedDialogue.value = true;
-        } else if (Object.keys(savedPost.value).length === 0) {
-
-        }
-      });
-  }
-});
+const postExcerpt = ref();
+const blogPostData = ref() as any;
+const route = useRoute();
+const rawImg = ref();
 onMounted(() => {
   quillEditor.value = document.querySelector(".ql-editor");
   window.addEventListener("keydown", (e) => {
@@ -147,28 +156,6 @@ onMounted(() => {
         doOnce.value = false;
       }
     }
-
-    if (postContent.value == undefined || postContent.value == "<p><br></p>") {
-      postContentShow.value = false;
-    } else {
-      postContentShow.value = true;
-    }
-    if (!postContentShow.value && !postTitleShow.value) {
-      saveShowButton.value = false;
-    } else {
-      saveShowButton.value = true;
-    }
-
-    if (postTitle.value == undefined || postTitle.value == "") {
-      postTitleShow.value = false;
-    } else {
-      postTitleShow.value = true;
-    }
-    if (!postContentShow.value && !postTitleShow.value) {
-      saveShowButton.value = false;
-    } else {
-      saveShowButton.value = true;
-    }
   });
 
   $(".ql-editor").scroll(function () {
@@ -178,6 +165,32 @@ onMounted(() => {
       console.log("at the bottom");
     } else {
       doOnce.value = true;
+    }
+  });
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      if (route.params.createSlug !== undefined) {
+        const dataBase = db
+          .collection("blogposts")
+          .doc(route.params.createSlug.toString());
+        dataBase
+          .get()
+          .then((doc) => {
+            blogPostData.value = doc.data();
+          })
+          .then(() => {
+            if (blogPostData.value !== undefined) {
+              postDate.value = blogPostData.value.postDate;
+              postAuthor.value = blogPostData.value.postAuthor;
+              postContent.value = blogPostData.value.postContent;
+              postTitle.value = blogPostData.value.postTitle;
+              rawImg.value = blogPostData.value.coverImage;
+              postExcerpt.value = blogPostData.value.postExcerpt;
+              postUploadTime.value = blogPostData.value.postUpload
+              postID.value = blogPostData.value.postID
+            }
+          });
+      }
     }
   });
 });
@@ -194,21 +207,28 @@ onMounted(() => {
       />
     </transition>
     <transition name="preview">
-      <Preview
-        v-if="showPreview"
-        @showPreview="onShowPostPreview"
-        :postTitle="postTitle"
-        :postContent="postContent"
-        :postDate="postDate"
-        :postAuthor="postAuthor"
-      />
+      <Preview v-if="showPreview" @showPreview="onShowPostPreview"
+      :postTitle="postTitle" :postContent="postContent" :postDate="postDate"
+      :postUpload="postUploadTime" :postAuthor="postAuthor" />
     </transition>
 
     <div class="container">
       <div class="post-editor" id="editor">
-        <div class="blog-title-wrapper">
-          <label class="blog-title">Title</label>
-          <input type="text" v-model="postTitle" />
+        <div class="editor-top-wrapper">
+          <div class="blog-title-wrapper">
+            <label class="blog-title">Title</label>
+            <input type="text" v-model="postTitle" />
+          </div>
+          <div class="blog-category-wrapper">
+            <label class="blog-category">Category</label>
+            <VueMultiselect
+              class="multiselect"
+              v-model="multiSelectSelected"
+              :options="multiSelectOptions"
+              :multiple="true"
+            >
+            </VueMultiselect>
+          </div>
         </div>
         <div class="editor-wrapper">
           <div class="editor">
@@ -225,13 +245,14 @@ onMounted(() => {
       </div>
       <Side
         ref="side"
-        :saveShow="saveShowButton"
         :postTitle="postTitle"
         :postContent="postContent"
         :postAuthor="postAuthor"
-        :loadSaved="loadSavedSide"
-        :postDate="new Date(postDate)"
+        :postDate="postDate"
         :checkSavedPost="checkSavedPost"
+        :rawImg="rawImg"
+        :postExcerpt="postExcerpt"
+        :postID="postID"
         @showPreview="onShowPostPreviewTrue"
         @postDate="postDateFn"
         @post-content="postContentFn"
@@ -240,6 +261,7 @@ onMounted(() => {
     </div>
   </div>
 </template>
+<style src="vue-multiselect/dist/vue-multiselect.css"></style>
 
 <style lang="scss" scoped>
 *::-webkit-scrollbar {
@@ -284,30 +306,47 @@ onMounted(() => {
         border-bottom: solid 2px rgba(0, 0, 0, 0.2);
         border-radius: 10px 10px 0 0;
       }
-      .blog-title-wrapper {
-        width: 50%;
-        height: 90px;
+      .editor-top-wrapper {
         display: flex;
-        flex-direction: column;
-        border-radius: 10px;
-        overflow: hidden;
+        justify-content: space-between;
+        gap: 20px;
+        .blog-title-wrapper {
+          width: 50%;
+          height: 90px;
+          display: flex;
+          flex-direction: column;
+          border-radius: 10px;
+          overflow: hidden;
 
-        input {
-          width: 100%;
-          height: 100%;
-          padding: 10px;
-          outline: none;
-          font-weight: 500;
-          font-family: Roboto;
-          font-size: 1rem;
-          color: var(--color-nav-txt);
-          background-color: var(--color-nav-bg);
-          border-style: none;
-          border-radius: 0 10px;
+          input {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            outline: none;
+            font-weight: 500;
+            font-family: Roboto;
+            font-size: 1rem;
+            color: var(--color-nav-txt);
+            background-color: var(--color-nav-bg);
+            border-style: none;
+            border-radius: 0 10px;
+          }
+
+          input:focus {
+            color: var(--color-nav-txt);
+          }
         }
-
-        input:focus {
-          color: var(--color-nav-txt);
+        .blog-category-wrapper {
+          width: 50%;
+          height: 100px;
+          display: flex;
+          flex-direction: column;
+          border-radius: 10px;
+          .multiselect {
+            height: 55px;
+            width: 100%;
+            color: rgba(0, 0, 0, 0.5);
+          }
         }
       }
 

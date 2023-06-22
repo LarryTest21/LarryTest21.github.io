@@ -34,16 +34,16 @@ const router = createRouter({
         ),
     },
     {
-      path: "/EditPosts",
-      name: "editposts",
+      path: "/EditPostsList",
+      name: "editpostslist",
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () =>
-        import(/* webpackChunkName: "News" */ "@/views/EditPosts.vue"),
+        import(/* webpackChunkName: "News" */ "@/views/EditPostsList.vue"),
     },
     {
-      path: "/CreatePost",
+      path: "/CreatePost/:createSlug",
       name: "createpost",
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
@@ -116,7 +116,7 @@ const router = createRouter({
     },
     {
       path: "/news/:newsSlug",
-      name: "hey",
+      name: "newspost",
       component: () =>
         import(/* webpackChunkName: "NewsPosts" */ "../views/NewsPosts.vue"),
     },
@@ -133,13 +133,18 @@ router.beforeEach((to, from, next) => {
   const isLoading = useLoaderState();
   const { changeStateTrue } = isLoading;
 
-  if (to.path === "/bsl" || to.path === "/news" || to.path === "/profile") {
+  if (
+    to.path === "/bsl" ||
+    to.path === "/news" ||
+    to.path === "/profile" ||
+    to.path === "/editposts"
+  ) {
     next();
   } else {
     changeStateTrue();
     setTimeout(() => {
       next();
-    }, 10);
+    }, 0);
   }
 });
 
@@ -149,11 +154,14 @@ router.afterEach((to, from) => {
   const isLoading = useLoaderState();
   const { changeStateFalse } = isLoading;
 
-  setTimeout(() => {
-    if (mountApp.state) {
-      changeStateFalse();
-    }
-  }, 300);
+  if (to.path === "/editposts") {
+  } else {
+    setTimeout(() => {
+      if (mountApp.state) {
+        changeStateFalse();
+      }
+    }, 300);
+  }
 });
 
 export default router;

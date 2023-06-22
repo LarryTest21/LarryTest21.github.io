@@ -82,7 +82,7 @@ onMounted(async () => {
   <div class="blog-container">
     <div class="wrapper">
       <transition-group name="fadeBlog">
-        <ul
+        <div
           v-if="!isLoading"
           class="blog-posts-ul"
           v-for="post in posts"
@@ -114,7 +114,7 @@ onMounted(async () => {
               <p v-html="post.metadata.description" class="posts-excerpt"></p>
             </div>
           </div>
-        </ul>
+        </div>
       </transition-group>
     </div>
   </div>

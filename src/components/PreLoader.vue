@@ -24,7 +24,7 @@
     color: var(--color-text);
     position: fixed;
     text-transform: uppercase;
-    z-index: 10;
+    z-index: 99;
 ;
 
     .outer {

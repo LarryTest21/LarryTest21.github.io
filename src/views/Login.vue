@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import "firebase/compat/auth";
-import firebase from "firebase/compat/";
+import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import { ref } from "vue";
 import router from "@/router";

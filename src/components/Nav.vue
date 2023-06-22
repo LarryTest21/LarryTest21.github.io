@@ -11,13 +11,13 @@ import { signedIn } from "../store/signedIn";
 import { userClicked } from "@/store/userClicked";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
-import englishFlag from "@/assets/logos/English_language.svg";
-import hungaryFlag from "@/assets/logos/Hungary_Flag.svg";
+import Englishflag from "@/assets/logos/English_language.svg";
+import Hungaryflag from "@/assets/logos/Hungary_Flag.svg";
 
-const langEn = ref(false);
-const langHu = ref(false);
+const langEn = ref(false) as any;
+const langHu = ref(false) as any;
 
-
+const Logo = new URL('../assets/logos/logo.svg', import.meta.url).href
 
 //FETCHING LOCATION FOR LANGUAGE
 
@@ -203,17 +203,8 @@ const weatherUnHovered = () => {
 const navRef = ref();
 const UserTabHeight = ref();
 
-
-
-
-
-
-
 //START ON MOUNT
 onMounted(() => {
-
-
- 
   onMountApp.value = true;
   getWeather();
   timeCurrent();
@@ -265,15 +256,15 @@ onMounted(() => {
 
 <template>
   <header class="fullNav" ref="navRef">
-
     <div class="wrapper">
-     
       <nav :class="currentTheme">
         <ul class="nav-links">
           <RouterLink to="/">
             <div class="nav-logo">
-              <img class="logo" src="/src/assets/logos/logo.svg" alt="" /></div
-          ></RouterLink>
+              <img  class="logo" :src="Logo" />
+
+            </div>
+          </RouterLink>
           <div class="user-wrapper">
             <TransitionGroup name="user">
               <a
@@ -301,7 +292,6 @@ onMounted(() => {
           <RouterLink to="/bsl"><li>BSL</li></RouterLink>
           <RouterLink to="/custom-teams"><li>Custom Teams</li></RouterLink>
           <RouterLink to="/contact"><li>Contact</li></RouterLink>
-
         </ul>
 
         <div class="wt-wrapper">
@@ -318,10 +308,7 @@ onMounted(() => {
             <div class="weather"></div>
           </div>
         </div>
-        <div class="language-wrapper">
-          <englishFlag v-if="langEn" />
-          <hungaryFlag v-if="langHu" />
-        </div>
+        <div class="language-wrapper"></div>
         <div class="theme-changer-wrapper">
           <label class="theme-changer">
             <input
@@ -333,7 +320,6 @@ onMounted(() => {
             />
             <span class="slider round"></span>
           </label>
-
         </div>
 
         <transition name="fadeLogin">
@@ -355,8 +341,6 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-
-
 .fullNav {
   z-index: 100;
   position: fixed;
@@ -576,7 +560,7 @@ onMounted(() => {
     position: relative;
     display: flex;
     flex-direction: column;
-    width:100px;
+    width: 100px;
     cursor: pointer;
     svg {
       border-radius: 10px;

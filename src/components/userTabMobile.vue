@@ -141,10 +141,10 @@ onMounted(() => {
       <router-link to="/profile"
         >Profile</router-link
       >
-      <router-link to="/createpost"
+      <router-link to="/createpost/newPost"
         >Create Post</router-link
       >
-      <router-link to="/editposts"
+      <router-link to="/editpostslist"
         >Edit Posts</router-link
       >
       <a @click.stop.prevent="logOut()">Logout</a>

@@ -10,6 +10,7 @@ const props = defineProps({
   loadingScale: Number,
   modalLoadingMessage: String,
   modalButtonMessage: String,
+  backgroundOpacity: Number,
 });
 
 const closeModal = () => {
@@ -25,8 +26,8 @@ const modalButton = modalButtonActive();
 <template>
   <div class="modal" @click="closeModal" v-click-away="closeModal">
     <TransitionGroup name="fade">
-      <div class="wrapper">
-        <p class="modal-message" key="lorem">
+      <div class="wrapper" key="lorem1">
+        <p class="modal-message" key="lorem2" v-if="modalLoadingMessage">
           {{ props.modalLoadingMessage }}
         </p>
         <div
@@ -73,11 +74,12 @@ const modalButton = modalButtonActive();
   top: 0;
   background-color: var(--color-nav-bg);
   opacity: 0.9;
+  opacity: v-bind(backgroundOpacity);
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 30px;
   z-index: -1;
+
 }
 .modal {
   width: 100%;
@@ -91,6 +93,7 @@ const modalButton = modalButtonActive();
   display: flex;
   flex-direction: column;
   z-index: 70;
+  left:0;
   font-size: 3rem;
   border-radius: 30px;
   .modal-message {
