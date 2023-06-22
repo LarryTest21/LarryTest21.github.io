@@ -5,7 +5,6 @@ import DownIcon from "@/components/icons/down.vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import "firebase/auth";
 import "@vuepic/vue-datepicker/dist/main.css";
-import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import Side from "@/components/CreatePostSide.vue";
 import Preview from "@/components/CreatePostPreview.vue";
 import firebase from "firebase/compat/app";
@@ -15,6 +14,7 @@ import Dialogue from "@/components/SavedPostDialogue.vue";
 import { useRoute } from "vue-router";
 import Multiselect from "vue-multiselect";
 import CreatePostSide from "@/components/CreatePostSide.vue";
+import "@/assets/vueup.scss"
 
 const postContent = ref();
 

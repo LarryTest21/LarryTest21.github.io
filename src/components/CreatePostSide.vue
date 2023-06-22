@@ -7,7 +7,6 @@ import "cropperjs/dist/cropper.css";
 import db from "../firebase/firebaseInit";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
-import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import Modal from "@/components/Modal.vue";
 import { updateCurrentUser } from "firebase/auth";
 import AskExcerpt from "@/components/CreatePostAskExcerpt.vue";
