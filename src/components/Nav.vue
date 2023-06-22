@@ -265,7 +265,7 @@ onMounted(() => {
 
             </div>
           </RouterLink>
-          <div class="user-wrapper">
+          <div class="user-wrapper" v-if="loginActivated">
             <TransitionGroup name="user">
               <a
                 key="2"
