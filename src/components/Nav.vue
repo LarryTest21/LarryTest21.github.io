@@ -375,7 +375,6 @@ onMounted(() => {
 
         a {
           color: var(--color-nav-txt);
-
           text-decoration: none;
           font-size: 1.5rem;
           text-transform: uppercase;

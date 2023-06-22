@@ -126,6 +126,12 @@ const router = createRouter({
       component: () =>
         import(/* webpackChunkName: "BlogPost" */ "../views/BlogPost.vue"),
     },
+    {
+      path: "/:pathMatch(.*)*",
+      name: "notfound",
+      component: () =>
+        import(/* webpackChunkName: "BlogPost" */ "../views/PageNotFound.vue"),
+    }
   ],
 });
 

@@ -29,8 +29,6 @@ const downIcon = ref() as any;
 const multiSelectSelected = ref([]);
 const multiSelectOptions = ["Blog", "Tournament", "Cup", "General"];
 
-
-
 const side = ref();
 const showPreview = ref(false);
 const quillEditor = ref() as any;
@@ -186,8 +184,8 @@ onMounted(() => {
               postTitle.value = blogPostData.value.postTitle;
               rawImg.value = blogPostData.value.coverImage;
               postExcerpt.value = blogPostData.value.postExcerpt;
-              postUploadTime.value = blogPostData.value.postUpload
-              postID.value = blogPostData.value.postID
+              postUploadTime.value = blogPostData.value.postUpload;
+              postID.value = blogPostData.value.postID;
             }
           });
       }
@@ -207,9 +205,15 @@ onMounted(() => {
       />
     </transition>
     <transition name="preview">
-      <Preview v-if="showPreview" @showPreview="onShowPostPreview"
-      :postTitle="postTitle" :postContent="postContent" :postDate="postDate"
-      :postUpload="postUploadTime" :postAuthor="postAuthor" />
+      <Preview
+        v-if="showPreview"
+        @showPreview="onShowPostPreview"
+        :postTitle="postTitle"
+        :postContent="postContent"
+        :postDate="postDate"
+        :postUpload="postUploadTime"
+        :postAuthor="postAuthor"
+      />
     </transition>
 
     <div class="container">
@@ -431,5 +435,75 @@ onMounted(() => {
 .savedDialogue-leave-to {
   overflow: hidden;
   max-height: 0px;
+}
+
+.ql-formats {
+  height: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ql-picker {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  top: -5px;
+}
+
+.ql-size.ql-picker::before {
+  height: 100%;
+  content: "Font";
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+.ql-header.ql-picker::before {
+  height: 100%;
+  content: "Header";
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+#ql-picker-options-2 {
+  top: 46px;
+}
+.ql-snow .ql-color-picker,
+.ql-snow .ql-icon-picker {
+  height: 100%;
+  width: 100%;
+  top: 0;
+  margin: auto;
+}
+.ql-toolbar.ql-snow .ql-form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options {
+  top: 45px;
+}
+
+.ql-editor::-webkit-scrollbar {
+  width: 30px;
+  border-radius: 10px;
+}
+.ql-editor::-webkit-scrollbar-track {
+  background: #c5c5c5;
+  border-radius: 10px;
+}
+.ql-editor::-webkit-scrollbar-thumb {
+  background: var(--color-nav-txt);
+  border-radius: 10px;
+  height: 10%;
+}
+.ql-formats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.ql-editor {
+  padding: 0;
 }
 </style>
