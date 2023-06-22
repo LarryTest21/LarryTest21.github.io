@@ -419,8 +419,8 @@ onUnmounted(() => {
       .dot {
         position: relative;
         backface-visibility: hidden;
-        height: 21px;
-        width: 21px;
+        height: 18px;
+        width: 18px;
         border-radius: 50%;
         transition: height 0.2s ease-in-out, width 0.2s ease-in-out,
           border-radius 0.2s ease-in-out, translate 0.2s ease-in-out;
@@ -440,17 +440,13 @@ onUnmounted(() => {
 
     @keyframes down {
       0% {
-        border-radius: 20%;
+        height:100px;
       }
       50% {
-        border-radius: 30px;
-        height:70px;
       }
       80% {
       }
       100% {
-        height:21px;
-        border-radius: 50%;
         transform: translate(0, 51px);
       }
     }
