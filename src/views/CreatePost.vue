@@ -436,7 +436,9 @@ onMounted(() => {
   overflow: hidden;
   max-height: 0px;
 }
+</style>
 
+<style lang="scss">
 .ql-formats {
   height: 32px;
   display: flex;
