@@ -4,7 +4,6 @@ import $ from "jquery";
 import DownIcon from "@/components/icons/down.vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import "firebase/auth";
-import "@vuepic/vue-datepicker/dist/main.css";
 import Side from "@/components/CreatePostSide.vue";
 import Preview from "@/components/CreatePostPreview.vue";
 import firebase from "firebase/compat/app";
@@ -15,6 +14,7 @@ import { useRoute } from "vue-router";
 import Multiselect from "vue-multiselect";
 import CreatePostSide from "@/components/CreatePostSide.vue";
 import "@/assets/vueup.scss"
+import "@/assets/multiselect.scss"
 
 const postContent = ref();
 
@@ -265,7 +265,6 @@ onMounted(() => {
     </div>
   </div>
 </template>
-<style src="vue-multiselect/dist/vue-multiselect.css"></style>
 
 <style lang="scss" scoped>
 *::-webkit-scrollbar {

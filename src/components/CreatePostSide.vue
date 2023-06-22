@@ -3,10 +3,9 @@ import { ref, onMounted, watch, computed } from "vue";
 import firebase from "firebase/compat/app";
 import VueCropper from "vue-cropperjs";
 import "cropperjs/dist/cropper.css";
-
 import db from "../firebase/firebaseInit";
 import VueDatePicker from "@vuepic/vue-datepicker";
-import "@vuepic/vue-datepicker/dist/main.css";
+import "@/assets/vuepic.scss"
 import Modal from "@/components/Modal.vue";
 import { updateCurrentUser } from "firebase/auth";
 import AskExcerpt from "@/components/CreatePostAskExcerpt.vue";
