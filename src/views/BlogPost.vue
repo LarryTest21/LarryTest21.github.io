@@ -5,98 +5,69 @@ import axios from "axios";
 import moment from "moment";
 import $ from "jquery";
 import "jquery";
-import Cosmic from "cosmicjs";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
 
 const route = useRoute();
-/* 
-const postsUrl = "http://localhost/wordpress/wp-json/wp/v2/posts";
-const queryOptions = reactive({
-  slug: route.params.blogSlug,
-  _embed: true,
-}); */
 const post = ref<any>({});
 const isLoading = ref(false);
 const latestPosts = ref<any>({});
+const blogPost = ref([]) as any;
 
-const api = Cosmic();
+const postSlug = ref(route.params.blogSlug) as any;
+console.log(postSlug.value);
+const colRef = firebase.firestore().collection("blogposts");
+const blogPosts = ref([]) as any;
 
-const bucket = api.bucket({
-  slug: "c27229f0-9018-11ed-b853-65fa50acc7e7",
-  read_key: "VLZQGABHjrhQj4iMYuvEXEfPRHZPnWt5CACFaIJB68PeteSwVX",
-});
+const postTitle = ref();
+const postAuthor = ref();
+const postDate = ref();
+const postContent = ref();
+const coverImage = ref();
+
+const newArray = ref([]);
 
 async function fetchData() {
   isLoading.value = true;
-  const data = await bucket.objects
-    .find({
-      type: "posts",
-      slug: route.params.blogSlug,
-    })
-    .props("slug,title,content,metadata"); // Limit the API response data by props
-  console.log(route.params.blogSlug);
-  post.value = data.objects;
-  isLoading.value = false;
-  console.log(post);
-}
+  colRef
 
-async function fetchDataSideBar() {
-  const data = await bucket.objects
-    .find({
-      type: "posts",
-    })
-    .props("slug,title,content,metadata")
-    .limit(3); // Limit the API response data by props
-  console.log(data);
+    .get()
+    .then((querySnapshot) =>
+      querySnapshot.forEach((post) => {
+        const check = post.data();
+        console.log(check);
+        blogPosts.value.push(check);
+        console.log(blogPosts.value);
+      })
+    )
+    .then(() => {
+      newArray.value = blogPosts.value.filter(
+        (item) => item.postID === postSlug.value
+      );
 
-  const sidebarPosts = data;
-  latestPosts.value = data.objects;
-  console.log(sidebarPosts);
-}
+      console.log(newArray.value);
+      blogPost.value = newArray.value;
+      console.log(blogPost.value);
+      console.log(blogPost.value[0].postAuthor);
 
-/* 
-const getPost = () => {
-  isLoading.value = true;
-  axios
-    .get(postsUrl, { params: queryOptions })
-    .then((response) => {
-      post.value = response.data;
+      postTitle.value = blogPost.value[0].postTitle;
+      postAuthor.value = blogPost.value[0].postAuthor;
+      postDate.value = moment(
+        new Date(blogPost.value[0].postDate.toDate())
+      ).format("MMM, DD\xa0\xa0\xa0HH:mm");
+      postContent.value = blogPost.value[0].postContent;
+      coverImage.value = blogPost.value[0].coverImage;
     })
-    .catch((error) => {
-      console.log(error);
+    .catch((err) => {
+      console.log(err);
     })
     .then(() => {
       isLoading.value = false;
     });
-};
-
-const latestPostsAPI = "http://localhost/wordpress/wp-json/wp/v2/posts";
-const latestPosts = ref([] as any);
- */
-/* const errorCaughtLatest = ref(false);
-
-var queryOptionsLatest = {
-  _embed: true,
-  per_page: 3,
-}; */
-/* 
-const getLatest = () => {
-  axios
-    .get(latestPostsAPI, { params: queryOptionsLatest })
-    .then((response) => {
-      latestPosts.value = response.data;
-    })
-    .catch((error) => {
-      if (error) {
-        errorCaughtLatest.value = true;
-      }
-    });
-}; */
-
-/* getPost();
-getLatest(); */
-
+}
 fetchData();
-fetchDataSideBar();
+
+async function fetchDataSideBar() {}
 
 watch(
   () => route.params.blogSlug,
@@ -109,43 +80,40 @@ watch(
 </script>
 
 <template>
-  <div v-if="!isLoading" class="post-wrapper">
-    <div class="wrapper">
-      <div class="post-title">{{ post[0].title }}</div>
-      <div class="post-date">
-        {{ moment(post[0].date).format("MMMM Do YYYY, h:mm, dddd") }}
+  <div v-if="!isLoading" class="posts-wrapper">
+    <div class="blogpost-wrapper">
+      <div class="post-title">
+        {{ postTitle }}
+        <div class="cover-image">
+          <img :src="coverImage" alt="" />
+        </div>
       </div>
-      <div class="post-author">{{ post[0].metadata.author?.title }}</div>
+      <div class="post-date">{{ postDate }}</div>
+      <div class="post-author">{{ postAuthor }}</div>
 
-      <div class="post-content" v-html="post[0].content"></div>
+      <div class="post-content" v-html="postContent"></div>
     </div>
   </div>
   <div class="side-container">
     <div class="side-wrapper">
-      <ul v-if="!isLoading" class="blog-posts-ul" v-for="latest in latestPosts">
+      <ul v-if="!isLoading" class="blog-posts-ul" v-for="latest in blogPosts">
         <div class="posts-card">
           <a
             ><router-link
-              :to="/blog/ + latest.slug"
+              :to="/blog/ + latest.postID"
               key="latest.id"
               class="posts-permalink"
             >
             </router-link
           ></a>
-          <img
-            v-if="latest.metadata.hero.url != 0"
-            class="posts-featuredimage"
-            :src="latest.metadata.image?.imgix_url"
-            :alt="latest.title"
-          />
-          <img v-else src="@/assets/logos/favicon-big.png" />
+          <img class="posts-featuredimage" :src="latest.coverImage" />
           <div class="posts-text">
-            <div class="posts-title">{{ latest.title }}</div>
+            <div class="posts-title">{{ latest.postTitle }}</div>
             <div class="posts-date">
-              <p>{{ moment(latest.date).fromNow() + " " + "ago" }}</p>
+              <p>{{ moment(latest.postDate).fromNow() + " " + "ago" }}</p>
             </div>
             <div class="posts-author">
-              {{ latest.metadata.author?.title }}
+              {{ latest.postAuthor }}
             </div>
           </div>
         </div>
@@ -155,21 +123,24 @@ watch(
 </template>
 
 <style scoped lang="scss">
-.post-wrapper {
-  height: 100%;
-  width: 80%;
+.posts-wrapper {
+  position: relative;
+  height: calc(100% - 70px);
+  padding-top: 70px;
+  width: 100%;
   padding-left: 40px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 
-  .wrapper {
-    padding-top: 100px;
+  .blogpost-wrapper {
+    right: 0;
+    left: 0;
+    margin: auto;
+    margin-top: 30px;
     width: 60%;
-    height: 100%;
     .post-title {
       font-family: Roboto Condensed;
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
       font-size: 5rem;
       font-weight: 700;
       line-height: 1.1;
@@ -188,12 +159,14 @@ watch(
       font-size: 1rem;
     }
     .post-content {
+      display: flex;
       font-family: Roboto;
       font-weight: 900;
       font-size: 1.3rem;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      margin-top: 30px;
 
       :deep(p:has(img)) {
         margin: 10px 0;
@@ -266,10 +239,10 @@ watch(
 }
 
 .side-container {
-  position:-webkit-sticky;
-  position: sticky;
-  top:0;
-  right:0;
+  position: absolute;
+  height: 100%;
+  top: 0;
+  right: 0;
   .side-wrapper::before {
     position: absolute;
     content: "";
@@ -280,7 +253,7 @@ watch(
     border-radius: 20px;
   }
   .side-wrapper {
-    position: relative;
+    position: sticky;
     .blog-posts-ul {
       display: flex;
 

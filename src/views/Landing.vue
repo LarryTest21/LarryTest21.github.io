@@ -440,7 +440,6 @@ onUnmounted(() => {
 
     @keyframes down {
       0% {
-        height:100px;
       }
       50% {
       }

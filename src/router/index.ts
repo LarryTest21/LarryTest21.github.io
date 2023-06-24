@@ -142,8 +142,7 @@ router.beforeEach((to, from, next) => {
   if (
     to.path === "/bsl" ||
     to.path === "/news" ||
-    to.path === "/profile" ||
-    to.path === "/editposts"
+    to.path === "/profile" 
   ) {
     next();
   } else {
@@ -154,13 +153,13 @@ router.beforeEach((to, from, next) => {
   }
 });
 
-router.afterEach((to, from) => {
+router.afterEach((to) => {
   const mountApp = onMountApp();
 
   const isLoading = useLoaderState();
   const { changeStateFalse } = isLoading;
 
-  if (to.path === "/editposts") {
+  if (to.path === "/editpostslist") {
   } else {
     setTimeout(() => {
       if (mountApp.state) {

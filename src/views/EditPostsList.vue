@@ -9,7 +9,8 @@ import $ from "jquery";
 import { doc, deleteDoc } from "firebase/firestore";
 import moment from "moment";
 
-// const isLoading = useLoaderState();
+const isLoading = useLoaderState();
+const { changeStateFalse } = isLoading;
 
 const blogPostsRefreshArray = ref([]) as any;
 const differencePosts = ref();
@@ -85,6 +86,7 @@ const initialPostRequest = () => {
     })
     .then(() => {
       intervalID.value = setInterval(refreshPostRequest, 2000);
+      changeStateFalse();
     });
 };
 
@@ -93,15 +95,6 @@ firebase.auth().onAuthStateChanged((user) => {
     initialPostRequest();
   }
 });
-const options = {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: false,
-} as Object;
 
 onMounted(() => {});
 
@@ -141,7 +134,11 @@ const buttonClear = () => {
                 <p class="postTitle">{{ post.postTitle }}</p>
                 <p class="postUploadTime">
                   Post Uploaded First:
-                 {{ moment(new Date(+post.postID)).format("MM/DD, YYYY, HH:mm:ss")  }}
+                  {{
+                    moment(new Date(+post.postID)).format(
+                      "MM/DD, YYYY, HH:mm:ss"
+                    )
+                  }}
                 </p>
 
                 <p class="postLastUpload">

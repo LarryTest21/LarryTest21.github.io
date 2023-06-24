@@ -1,76 +1,44 @@
 <script setup lang="ts">
 import axios from "axios";
-import { ref } from "vue";
-import { onMounted } from "vue";
+import { ref, watch, computed, toRaw, onUnmounted, onMounted } from "vue";
 import moment from "moment";
-import Cosmic from "cosmicjs";
-
-/* const postsUrl = "http://localhost/wordpress/wp-json/wp/v2/posts";*/
-const api = Cosmic();
-const posts = ref([] as any);
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import db from "../firebase/firebaseInit";
 
 const isLoading = ref(false);
 const errorCaught = ref(false);
+const colRef = firebase.firestore().collection("blogposts");
+const blogPosts = ref([]) as any;
 
-const bucket = api.bucket({
-  slug: "c27229f0-9018-11ed-b853-65fa50acc7e7",
-  read_key: "VLZQGABHjrhQj4iMYuvEXEfPRHZPnWt5CACFaIJB68PeteSwVX",
-});
+async function getPosts() {
+  colRef
 
-async function fetchData() {
-  isLoading.value = true;
-
-  const data = await bucket.objects
-    .find({
-      type: "posts",
-    })
-    .props("slug,title,content,metadata")
-    .limit(9);
-
-  posts.value = data.objects;
-}
-
-async function finishedFetch() {
-  await fetchData().then(() => {
-    isLoading.value = false;
-  });
-}
-/* 
-var queryOptions = {
-  _embed: true,
-};
-
-const getPosts = () => {
-  isLoading.value = true;
-
-  axios
-    .get(postsUrl, { params: queryOptions })
-    .then((response) => {
-      posts.value = response.data;
-      console.log(posts.value);
-      isLoading.value = false;
+    .get()
+    .then((querySnapshot) =>
+      querySnapshot.forEach((post) => {
+        const check = post.data();
+        console.log(check);
+        blogPosts.value.push(check);
+        console.log(blogPosts.value);
+      })
+    )
+    .catch((err) => {
+      console.log(err);
     })
     .then(() => {
-      console.log(isLoading.value);
-    })
-    .catch((error) => {
-      if (error) {
-        isLoading.value = false;
-        errorCaught.value = true;
-      }
+      isLoading.value = false;
     });
-}; */
-
+}
 onMounted(async () => {
-  /* getPosts(); */
-  fetchData();
-  finishedFetch();
+  isLoading.value = true;
+  getPosts();
 });
 </script>
 
 <template>
-  <transition name="fadeLoading">
-    <div v-if="isLoading" class="posts-loading">
+  <transition v-if="isLoading" name="fadeLoading">
+    <div class="posts-loading">
       <div class="circle"></div>
     </div>
   </transition>
@@ -81,41 +49,35 @@ onMounted(async () => {
   </transition>
   <div class="blog-container">
     <div class="wrapper">
-      <transition-group name="fadeBlog">
-        <div
-          v-if="!isLoading"
-          class="blog-posts-ul"
-          v-for="post in posts"
-          :key="post.slug"
-          :class="[post.metadata.featured ? 'featured' : '']"
-        >
-          <div class="posts-card">
-            <a
-              ><router-link
-                :to="/blog/ + post.slug"
-                key="post.id"
-                class="posts-permalink"
-              >
-              </router-link
-            ></a>
-            <div class="posts-image">
-              <img
-                v-if="post.metadata.image != null"
-                class="post.metadata.hero"
-                :src="post.metadata.image.imgix_url"
-                :alt="post.title"
-              />
-              <img v-else src="@/assets/logos/favicon-big.png" />
-            </div>
+      <div class="blog-posts-ul" v-for="post in blogPosts" :key="post.postID">
+        <div class="posts-card">
+          <a
+            ><router-link
+              :to="/blog/ + post.postID"
+              key="post.id"
+              class="posts-permalink"
+            >
+            </router-link
+          ></a>
+          <div class="posts-image">
+            <img
+              class="post.metadata.hero"
+              :src="post.coverImage"
+              :alt="post.postTitle"
+            />
+          </div>
 
-            <div class="posts-text">
-              <h1 class="posts-title">{{ post.title }}</h1>
-
-              <p v-html="post.metadata.description" class="posts-excerpt"></p>
-            </div>
+          <div class="posts-text">
+            <h1 class="posts-title">{{ post.postTitle }}</h1>
+            <p class="posts-date">
+              {{
+                moment(new Date(post.postDate.toDate())).format("MMM DD, HH:mm")
+              }}
+            </p>
+            <p class="posts-excerpt">{{ post.postExcerpt }}</p>
           </div>
         </div>
-      </transition-group>
+      </div>
     </div>
   </div>
 </template>
@@ -130,6 +92,8 @@ onMounted(async () => {
     justify-content: center;
     align-items: center;
     z-index: 100;
+    transition: opacity 1s ease-in-out;
+
     .circle {
       width: 300px;
       height: 300px;
@@ -227,6 +191,7 @@ onMounted(async () => {
         padding-inline-start: 0;
         padding: 0 0;
         .posts-card {
+          position: relative;
           width: 400px;
           height: 100%;
           display: flex;
@@ -238,60 +203,48 @@ onMounted(async () => {
           }
           .posts-image {
             display: inherit;
-            width: 100%;
-            height: 300px;
-            img {
-              max-width: 100%;
-              object-fit: cover;
-              border-radius: 10px;
-              box-shadow: rgba(0, 0, 0, 0.2) 5px 5px 10px 5px;
-            }
-
-            .posts-date {
-              position: absolute;
-              display: inline-block;
-              margin: 10px 10px;
-              left: 0;
-              transition: transform 0.08s ease-in-out;
-              p {
-                color: var(--color-nav-txt);
-                background-color: var(--color-nav-bg);
-                padding: 0 10px;
-                border-radius: 20px;
-                display: flex;
-                font-size: 1.2rem;
-                font-weight: 600;
-                font-style: italic;
-              }
-            }
-          }
-          a {
-            position: absolute;
             height: 100%;
             width: 100%;
-            border-radius: 20px;
-            z-index: 10;
+            border-radius: 10px;
+            box-shadow: rgba(0, 0, 0, 0.2) 5px 5px 10px 5px;
+            overflow: hidden;
+
+            img {
+              width: 100%;
+              object-fit: fill;
+            }
           }
-          /*       a:hover + .posts-image .posts-date {
+        }
+        a {
+          position: absolute;
+          height: 100%;
+          width: 100%;
+          border-radius: 20px;
+          z-index: 10;
+        }
+        /*       a:hover + .posts-image .posts-date {
             transform: translate(100px);
           } */
 
-          .posts-text {
-            max-width: 100%;
-            display: flex;
-            border-radius: 20px;
-            padding: 10px;
-            flex-direction: column;
-            word-wrap: break-word;
-            transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
-            backface-visibility: hidden;
+        .posts-text {
+          max-width: 100%;
+          display: flex;
+          border-radius: 20px;
+          padding: 10px;
+          flex-direction: column;
+          word-wrap: break-word;
+          transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
+          backface-visibility: hidden;
+          font-size: 1rem;
+          font-family: Roboto Condensed;
+          .posts-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+          }
+          .posts-date {
+            font-style: italic;
 
-            .posts-title {
-              font-size: 1.1rem;
-              font-weight: 700;
-            }
             .posts-excerpt {
-              font-size: 0.9rem;
             }
           }
         }
@@ -307,8 +260,9 @@ onMounted(async () => {
   .fadeBlog-leave-to {
     opacity: 0;
   }
+  .fadeLoading-enter-active,
   .fadeLoading-leave-active {
-    transition: opacity 0.5s ease-in-out;
+    transition: opacity 0.8s ease-in;
   }
 
   .fadeLoading-enter-from,
