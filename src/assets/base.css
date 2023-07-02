@@ -4,46 +4,10 @@ IMPORT FONTS
 @import url("https://fonts.cdnfonts.com/css/roboto-condensed");
 @import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;0,1000;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900;1,1000&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;0,1000;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900;1,1000&family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
-@font-face {
-  font-family: MyErosion;
-  src: url("fonts/erosion/erosion.eot");
-  src: url("fonts/erosion/erosion.eot?#iefix") format("eot"), url("fonts/erosion/erosion.woff") format("woff"), url("fonts/erosion/erosion.ttf") format("truetype");
-  font-weight: "normal";
-}
-@font-face {
-  font-family: Chango;
-  src: url("fonts/chango/chango.eot");
-  src: url("fonts/chango/chango.eot?#iefix") format("eot"), url("fonts/chango/chango.woff") format("woff"), url("fonts/chango/chango.ttf") format("truetype");
-  font-weight: "normal";
-}
-@font-face {
-  font-family: Pony;
-  src: url("fonts/icialpony/iCielPony.eot");
-  src: url("fonts/icialpony/iCielPony?#iefix") format("eot"), url("fonts/icialpony/iCielPony.woff") format("woff"), url("fonts/icialpony/iCielPony") format("truetype");
-  font-weight: "normal";
-}
-@font-face {
-  font-family: Dink;
-  src: url("fonts/dink/dink.eot");
-  src: url("fonts/dink/dink.eot?#iefix") format("eot"), url("fonts/dink/dink.woff") format("woff"), url("fonts/dink/dink.ttf") format("truetype");
-  font-weight: "normal";
-}
+@import url("https://fonts.googleapis.com/css2?family=Chango&display=swap");
 @font-face {
   font-family: DirtyEgo;
-  src: url("fonts/dirtyego/DirtyEgo.eot");
-  src: url("fonts/dirtyego/DirtyEgo.eot?#iefix") format("eot"), url("fonts/dirtyego/DirtyEgo.woff") format("woff"), url("fonts/dirtyego/DirtyEgo.ttf") format("truetype");
-  font-weight: "normal";
-}
-@font-face {
-  font-family: Ruck;
-  src: url("fonts/ruck/Rueckwarzsalto.eot");
-  src: url("fonts/ruck/Rueckwarzsalto.eot?#iefix") format("eot"), url("fonts/ruck/Rueckwarzsalto.woff") format("woff"), url("fonts/ruck/Rueckwarzsalto.ttf") format("truetype");
-  font-weight: "normal";
-}
-@font-face {
-  font-family: Amateur;
-  src: url("fonts/amateur/amateur.eot");
-  src: url("fonts/amateur/amateur.eot?#iefix") format("eot"), url("fonts/amateur/amateur.woff") format("woff"), url("fonts/amateur/amateur.ttf") format("truetype");
+  src: url("fonts/dirtyego/DirtyEgo.woff") format("woff"), url("fonts/dirtyego/DirtyEgo.ttf") format("truetype");
   font-weight: "normal";
 }
 @font-face {
@@ -85,7 +49,7 @@ IMPORT FONTS
   --vt-c-text-light: rgb(3, 70, 124);
   --vt-c-nav-light-bg: rgb(2, 67, 133);
   --vt-c-nav-light-txt: rgb(235, 235, 235);
-  --vt-c-nav-light-txt-light:rgb(211, 209, 209);
+  --vt-c-nav-light-txt-light: rgb(211, 209, 209);
   --vt-c-nav-light-text-hover: rgb(2, 67, 133);
   --vt-c-nav-light-text-bg: rgb(235, 235, 235);
   --vt-c-nav-text-active-light: rgb(2, 67, 133);

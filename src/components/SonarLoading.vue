@@ -1,5 +1,3 @@
-<script></script>
-
 <template>
   <div class="posts-loading">
     <div class="spinner"></div>

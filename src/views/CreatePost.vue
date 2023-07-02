@@ -59,7 +59,6 @@ const toolbarOptions = [
   [{ size: ["small", false, "large", "huge"] }], // custom dropdown
   [{ header: [1, 2, false] }],
   ["link", "image", "video"], // add's image support
-  [{ color: [] }], // dropdown with defaults from theme
 
   ["clean"],
 ];
