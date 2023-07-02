@@ -24,13 +24,8 @@ const modalAnimation = ref(false);
 const error = ref(false);
 const loggedIn = ref(false);
 
-const inputCHanged =  () => {
-  console.log("changed")
-}
-
 const signIn = () => {
   modalButtonMessage.value = "";
-
   modalButtonShow.value = false;
   modalAnimation.value = true;
   modalActivation.state = true;
@@ -39,14 +34,13 @@ const signIn = () => {
     .auth()
     .signInWithEmailAndPassword(email.value, password.value)
     .then(() => {
-      error.value = false;
-
       firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
       const signedInCheck = signedIn();
       const { signedInTrue } = signedInCheck;
       signedInTrue();
-      localStorage.setItem("loggedIn", JSON.stringify(loggedIn));
+      loggedIn.value = true;
+      localStorage.setItem("isLoggedIn", JSON.stringify(loggedIn.value));
+      localStorage.setItem("loggedInBefore", "true");
       modalActivation.state = false;
     })
     .catch((err) => {
@@ -63,7 +57,7 @@ const signIn = () => {
       } else if (err.code === "auth/wrong-password") {
         modalButtonMessage.value = "Wrong Password";
       }
-    })
+    });
 };
 
 onMounted(() => {
@@ -202,7 +196,6 @@ onMounted(() => {
       font-weight: Light;
     }
 
-
     .buttons {
       display: flex;
       align-items: center;
@@ -261,7 +254,6 @@ onMounted(() => {
     }
   }
 }
-
 
 .modal-enter-active,
 .modal-leave-active {

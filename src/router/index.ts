@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import "jquery";
 import $ from "jquery";
 import { onMountApp } from "@/store/onMountApp";
+import { ref } from "vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -54,11 +55,14 @@ const router = createRouter({
     {
       path: "/Profile",
       name: "profile",
+      beforeEnter: guardRoute,
+
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () =>
         import(/* webpackChunkName: "News" */ "@/views/Profile.vue"),
+      meta: { title: "Home" },
     },
     {
       path: "/rulebook",
@@ -84,7 +88,8 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "BSL" */ "../views/BSL.vue"),
+      component: () =>
+        import(/* webpackChunkName: "BSL" */ "../views/Blog.vue"),
     },
     {
       path: "/custom-teams",
@@ -118,7 +123,7 @@ const router = createRouter({
       path: "/news/:newsSlug",
       name: "newspost",
       component: () =>
-        import(/* webpackChunkName: "NewsPosts" */ "../views/NewsPosts.vue"),
+        import(/* webpackChunkName: "NewsPosts" */ "../views/NewsPost.vue"),
     },
     {
       path: "/blog/:blogSlug",
@@ -131,7 +136,7 @@ const router = createRouter({
       name: "notfound",
       component: () =>
         import(/* webpackChunkName: "BlogPost" */ "../views/PageNotFound.vue"),
-    }
+    },
   ],
 });
 
@@ -139,11 +144,7 @@ router.beforeEach((to, from, next) => {
   const isLoading = useLoaderState();
   const { changeStateTrue } = isLoading;
 
-  if (
-    to.path === "/bsl" ||
-    to.path === "/news" ||
-    to.path === "/profile" 
-  ) {
+  if (to.path === "/bsl" || to.path === "/news" || to.path === "/profile") {
     next();
   } else {
     changeStateTrue();
@@ -155,9 +156,10 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach((to) => {
   const mountApp = onMountApp();
-
   const isLoading = useLoaderState();
   const { changeStateFalse } = isLoading;
+
+  const isLoggedIn = ref(false);
 
   if (to.path === "/editpostslist") {
   } else {
@@ -168,5 +170,26 @@ router.afterEach((to) => {
     }, 300);
   }
 });
+
+router.beforeEach((to, from, next) => {
+  var isAuthenticated = JSON.parse(
+    localStorage.getItem("isLoggedIn") as string
+  );
+  if ((to.name == 'profile' && !isAuthenticated) || (to.name == 'editpostslist' && !isAuthenticated) || (to.name == 'createpost' && !isAuthenticated)) next({ name: 'login' })
+  else next()
+})
+
+
+function guardRoute(to, from, next) {
+  var isAuthenticated = JSON.parse(
+    localStorage.getItem("isLoggedIn") as string
+  );
+
+  if (isAuthenticated) {
+    next(); // allow to enter route
+  } else {
+    next("/login"); // go to '/login';
+  }
+}
 
 export default router;

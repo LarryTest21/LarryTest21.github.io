@@ -65,16 +65,14 @@ watch(
 );
 function moveScrollIndicator(e) {
   const maxHeight = document.body.scrollHeight - window.innerHeight;
-const scrollIndicator = document.getElementById("scrollIndicator")
+  const scrollIndicator = document.getElementById("scrollIndicator");
   const percentage = (window.scrollY / maxHeight) * 100;
-  if(percentage > 0) {
-scrollIndicator!.style.opacity ='1';
+  if (percentage > 0) {
+    scrollIndicator!.style.opacity = "1";
     scrollIndicator!.style.width = percentage + "%";
   } else if (percentage == 0) {
-    scrollIndicator!.style.opacity ='0';
-
+    scrollIndicator!.style.opacity = "0";
   }
-
 }
 
 onMounted(() => {
@@ -116,7 +114,7 @@ onMounted(() => {
 
 <style lang="scss">
 .scrollLineTop {
-  opacity:0;
+  opacity: 0;
   background: var(--color-nav-txt);
   height: 8px;
   left: 0;
@@ -179,4 +177,3 @@ onMounted(() => {
   color: red;
 }
 </style>
-

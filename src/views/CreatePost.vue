@@ -13,8 +13,8 @@ import Dialogue from "@/components/SavedPostDialogue.vue";
 import { useRoute } from "vue-router";
 import Multiselect from "vue-multiselect";
 import CreatePostSide from "@/components/CreatePostSide.vue";
-import "@/assets/vueup.scss"
-import "@/assets/multiselect.scss"
+import "@/assets/vueup.scss";
+import "@/assets/multiselect.scss";
 
 const postContent = ref();
 
@@ -28,6 +28,18 @@ const postUploadTime = ref();
 const downIcon = ref() as any;
 const multiSelectSelected = ref([]);
 const multiSelectOptions = ["Blog", "Tournament", "Cup", "General"];
+const singleSelected = ref();
+const singleSelectOptions = ["Blog", "News"];
+const blogSelected = ref(false);
+
+watch(singleSelected, (newValue) => {
+  if (newValue == "Blog") {
+    blogSelected.value = true;
+  } else {
+    blogSelected.value = false;
+    multiSelectSelected.value = [];
+  }
+});
 
 const side = ref();
 const showPreview = ref(false);
@@ -96,6 +108,9 @@ firebase.auth().onAuthStateChanged((user) => {
     }
   }
 });
+const quillBottom = () => {
+  $('.ql-editor').scrollTop($('.ql-editor')[0].scrollHeight);
+};
 
 const userData = ref();
 const postAuthor = ref();
@@ -138,11 +153,14 @@ const dialogueDelete = async () => {
     });
 };
 
+const scrollToBottom = () => {
+    $(".ql-editor").scrollTop($(".ql-editor")[0].scrollHeight);
+  };
 //GETTING AUTHOR NAME
 const postExcerpt = ref();
 const blogPostData = ref() as any;
 const route = useRoute();
-const rawImg = ref();
+const rawImg = ref(null) as any;
 onMounted(() => {
   quillEditor.value = document.querySelector(".ql-editor");
   window.addEventListener("keydown", (e) => {
@@ -165,6 +183,13 @@ onMounted(() => {
       doOnce.value = true;
     }
   });
+
+  $(".ql-editor").change(function () {
+    scrollToBottom();
+  });
+
+
+
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
       if (route.params.createSlug !== undefined) {
@@ -186,6 +211,8 @@ onMounted(() => {
               postExcerpt.value = blogPostData.value.postExcerpt;
               postUploadTime.value = blogPostData.value.postUpload;
               postID.value = blogPostData.value.postID;
+              singleSelected.value = blogPostData.value.postSection;
+              multiSelectSelected.value = blogPostData.value.postCategory;
             }
           });
       }
@@ -223,15 +250,31 @@ onMounted(() => {
             <label class="blog-title">Title</label>
             <input type="text" v-model="postTitle" />
           </div>
-          <div class="blog-category-wrapper">
-            <label class="blog-category">Category</label>
-            <VueMultiselect
-              class="multiselect"
-              v-model="multiSelectSelected"
-              :options="multiSelectOptions"
-              :multiple="true"
-            >
-            </VueMultiselect>
+          <div class="selection-wrapper">
+            <div class="blog-section-wrapper">
+              <label class="blog-category">Section</label>
+              <VueMultiselect
+                class="multiselect"
+                v-model="singleSelected"
+                :options="singleSelectOptions"
+                :searchable="false"
+                placeholder="Select section"
+              >
+              </VueMultiselect>
+            </div>
+            <div class="blog-category-wrapper" v-show="blogSelected">
+              <label class="blog-category">Category</label>
+
+              <VueMultiselect
+                class="multiselect"
+                v-model="multiSelectSelected"
+                :options="multiSelectOptions"
+                :multiple="true"
+                :searchable="false"
+                placeholder="Select category"
+              >
+              </VueMultiselect>
+            </div>
           </div>
         </div>
         <div class="editor-wrapper">
@@ -243,6 +286,7 @@ onMounted(() => {
               v-model:content="postContent"
               contentType="html"
               :toolbar="toolbarOptions"
+              @text-change="quillBottom"
             />
           </div>
         </div>
@@ -257,6 +301,8 @@ onMounted(() => {
         :rawImg="rawImg"
         :postExcerpt="postExcerpt"
         :postID="postID"
+        :postSection="singleSelected"
+        :postCategory="multiSelectSelected"
         @showPreview="onShowPostPreviewTrue"
         @postDate="postDateFn"
         @post-content="postContentFn"
@@ -339,16 +385,29 @@ onMounted(() => {
             color: var(--color-nav-txt);
           }
         }
-        .blog-category-wrapper {
+        .selection-wrapper {
           width: 50%;
           height: 100px;
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
           border-radius: 10px;
+          gap: 20px;
+
           .multiselect {
+            cursor: pointer;
+
             height: 55px;
             width: 100%;
             color: rgba(0, 0, 0, 0.5);
+          }
+          .blog-section-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 50%;
+          }
+
+          .blog-category-wrapper {
+            width: 100%;
           }
         }
       }

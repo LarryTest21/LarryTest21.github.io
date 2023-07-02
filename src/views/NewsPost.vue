@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, watch, onBeforeUnmount, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import moment from "moment";
 import $ from "jquery";
@@ -9,13 +9,11 @@ import "firebase/compat/auth";
 import SideBar from "@/components/PostSideBar.vue";
 
 const route = useRoute();
-const post = ref<any>({});
 const isLoading = ref(false);
-const latestPosts = ref<any>({});
-const blogPost = ref([]) as any;
-
-const postSlug = ref(route.params.blogSlug) as any;
-const colRef = firebase.firestore().collection("blogposts");
+const newsPosts = ref([]) as any;
+const sidebar = ref();
+const postSlug = ref(route.params.newsSlug) as any;
+const colRef = firebase.firestore().collection("news");
 const blogPosts = ref([]) as any;
 
 const postTitle = ref();
@@ -24,37 +22,41 @@ const postDate = ref();
 const postContent = ref();
 const coverImage = ref();
 const postCategory = ref([]) as any;
-const newArray = ref([]);
+const singlePost = ref([]) as any;
 const postSideBar = ref();
-const sidebar = ref();
+
+postSlug.value = route.params.newsSlug;
 
 async function fetchData() {
   isLoading.value = true;
   blogPosts.value = [];
-  postSlug.value = route.params.blogSlug;
+  postSlug.value = route.params.newsSlug;
   colRef
     .get()
     .then((querySnapshot) =>
       querySnapshot.forEach((post) => {
-        const check = post.data();
-        blogPosts.value.push(check);
+        const check1 = post.data();
+        newsPosts.value.push(check1);
+        postSideBar.value = "news"
+
       })
     )
     .then(() => {
-      newArray.value = blogPosts.value.filter(
+      singlePost.value = newsPosts.value.filter(
         (item) => item.postID === postSlug.value
       );
 
-      blogPost.value = newArray.value;
-      postSideBar.value = "blog";
-      postTitle.value = blogPost.value[0].postTitle;
-      postAuthor.value = blogPost.value[0].postAuthor;
+      postTitle.value = singlePost.value[0].postTitle;
+      postAuthor.value = singlePost.value[0].postAuthor;
       postDate.value = moment(
-        new Date(blogPost.value[0].postDate.toDate())
+        new Date(singlePost.value[0].postDate.toDate())
       ).format("MMM, DD\xa0\xa0\xa0HH:mm");
-      postContent.value = blogPost.value[0].postContent;
-      coverImage.value = blogPost.value[0].coverImage;
-      postCategory.value = blogPost.value[0].postCategory[0];
+      postContent.value = singlePost.value[0].postContent;
+      coverImage.value = singlePost.value[0].coverImage;
+      postCategory.value = singlePost.value[0].postCategory[0];
+      newsPosts.value = newsPosts.value.filter(
+        (item) => item.postID !== postSlug.value
+      );
     })
     .catch((err) => {
       console.log(err);
@@ -65,18 +67,16 @@ async function fetchData() {
 }
 fetchData();
 
-async function fetchDataSideBar() {}
-
 watch(
-  () => route.params.blogSlug,
+  () => route.params.newsSlug,
   () => {
-    postSlug.value = route.params.blogSlug;
-    /*  getPost(); */
+    newsPosts.value = [];
     fetchData();
   }
 );
-
 const scrollTopp = ref();
+const postWrapper = ref();
+
 
 function logScroll() {
   const sidebar2 = sidebar.value.sidebar;
@@ -93,7 +93,7 @@ function logScroll() {
     sidebar2.style.position = "absolute";
     sidebar2.style.top = "400px";
   } else if (toBottom) {
-    sidebar2.style.top = scrollTopp.value / 5 + scrollTopp.value + "px";
+    sidebar2.style.top = scrollTopp.value + 110 + "px";
     console.log(scrollTopp.value);
   }
 }
@@ -105,11 +105,12 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener("scroll", logScroll);
 });
+
 </script>
 
 <template>
   <div v-if="!isLoading" class="posts-wrapper">
-    <div class="blogpost-wrapper">
+    <div class="newspost-wrapper" ref="postWrapper">
       <div class="post-title">
         {{ postTitle }}
         <div class="post-category">
@@ -118,34 +119,43 @@ onBeforeUnmount(() => {
       </div>
       <div class="post-date">{{ postDate }}</div>
       <div class="post-author">{{ postAuthor }}</div>
-
+      <img :src="coverImage" alt="" />
       <div class="post-content" v-html="postContent"></div>
     </div>
+    <SideBar
+      ref="sidebar"
+      class="sidebar"
+      :Posts="newsPosts"
+      :Slug="postSlug"
+      :postSideBar="postSideBar"
+    />
   </div>
-  <SideBar
-    ref="sidebar"
-    class="sidebar"
-    :Posts="blogPosts"
-    :Slug="postSlug"
-    :postSideBar="postSideBar"
-  />
 </template>
 
 <style scoped lang="scss">
 .posts-wrapper {
   position: relative;
   height: calc(100% - 70px);
+  width: 100vw;
   padding-top: 70px;
-  width: 100%;
   padding-left: 40px;
-
-  .blogpost-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  img {
+    width: 150px;
+    height: auto;
+  }
+  .newspost-wrapper {
     right: 0;
-    left: 0;
+    position: relative;
     margin: auto;
     margin-top: 30px;
     width: 60%;
     color: var(--color-nav-bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     .post-title {
       font-family: Roboto Condensed;
       display: flex;
@@ -159,8 +169,8 @@ onBeforeUnmount(() => {
       align-items: flex-start;
 
       .post-category {
+        list-style: none;
         font-size: 1rem;
-        padding: 5px;
         background-color: var(--color-nav-bg);
         color: var(--color-nav-txt);
         border-radius: 10px;
@@ -221,9 +231,7 @@ onBeforeUnmount(() => {
       :deep(p) {
         margin: 10px 0;
       }
-      :deep(figcaption) {
-        margin: 10px 0 30px 0;
-      }
+
       :deep(img) {
         background-color: red;
         border-radius: 20px;
@@ -255,10 +263,76 @@ onBeforeUnmount(() => {
       }
     }
   }
+  .side-container {
+    position: absolute;
+    top: 400px;
+    right: 40px;
+
+    .side-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: min-content;
+
+      .blog-posts-ul {
+        display: flex;
+
+        .posts-card::before {
+          position: absolute;
+          content: "";
+          height: 100%;
+          left: -20px;
+          width: 10px;
+          background-color: var(--color-text);
+          border-radius: 20px;
+        }
+        .posts-card {
+          position: relative;
+          height: 100px;
+          width: 300px;
+          display: flex;
+          flex-direction: row;
+          gap: 10px;
+          margin: 15px 0;
+
+          a {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+          }
+
+          img {
+            position: relative;
+            height: 100px;
+            border-radius: 10px;
+          }
+          .posts-text {
+            line-height: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+
+            .posts-title {
+              font-size: 1rem;
+              font-weight: 600;
+              display: flex;
+            }
+            .posts-date {
+              font-size: 0.8rem;
+            }
+            .posts-author {
+              font-size: 0.7rem;
+            }
+          }
+        }
+      }
+    }
+  }
 }
 .sidebar {
-  position: absolute;
-  right: 0;
-  top: 400px;
-}
+    position: absolute;
+    right:0;
+    top:400px;
+  }
 </style>

@@ -5,6 +5,7 @@ import moment from "moment";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import db from "../firebase/firebaseInit";
+import SonarLoading from "@/components/SonarLoading.vue";
 
 const isLoading = ref(false);
 const errorCaught = ref(false);
@@ -13,21 +14,20 @@ const blogPosts = ref([]) as any;
 
 async function getPosts() {
   colRef
-
     .get()
     .then((querySnapshot) =>
       querySnapshot.forEach((post) => {
         const check = post.data();
-        console.log(check);
         blogPosts.value.push(check);
-        console.log(blogPosts.value);
       })
     )
     .catch((err) => {
       console.log(err);
     })
     .then(() => {
-      isLoading.value = false;
+      setTimeout(() => {
+        isLoading.value = false;
+      }, 500);
     });
 }
 onMounted(async () => {
@@ -37,124 +37,55 @@ onMounted(async () => {
 </script>
 
 <template>
-  <transition v-if="isLoading" name="fadeLoading">
-    <div class="posts-loading">
-      <div class="circle"></div>
-    </div>
-  </transition>
   <transition name="fadeLoading">
-    <div class="errorCaught" v-if="errorCaught">
-      There was an error loading news
-    </div>
+    <SonarLoading v-if="isLoading" />
   </transition>
-  <div class="blog-container">
-    <div class="wrapper">
-      <div class="blog-posts-ul" v-for="post in blogPosts" :key="post.postID">
-        <div class="posts-card">
-          <a
-            ><router-link
-              :to="/blog/ + post.postID"
-              key="post.id"
-              class="posts-permalink"
-            >
-            </router-link
-          ></a>
-          <div class="posts-image">
-            <img
-              class="post.metadata.hero"
-              :src="post.coverImage"
-              :alt="post.postTitle"
-            />
-          </div>
+  <TransitionGroup name="fadeBlog">
+    <div class="blog-container" key="1"  v-if="!isLoading">
+      <div class="wrapper" key="2">
+        <div
+          class="blog-posts-ul"
+         
+          v-for="post in blogPosts"
+          :key="post.postID"
+        >
+          <div class="posts-card">
+            <a
+              ><router-link
+                :to="/blog/ + post.postID"
+                key="post.id"
+                class="posts-permalink"
+              >
+              </router-link
+            ></a>
+            <div class="posts-image">
+              <img
+                class="post.metadata.hero"
+                :src="post.coverImage"
+                :alt="post.postTitle"
+              />
+            </div>
 
-          <div class="posts-text">
-            <h1 class="posts-title">{{ post.postTitle }}</h1>
-            <p class="posts-date">
-              {{
-                moment(new Date(post.postDate.toDate())).format("MMM DD, HH:mm")
-              }}
-            </p>
-            <p class="posts-excerpt">{{ post.postExcerpt }}</p>
+            <div class="posts-text">
+              <h1 class="posts-title">{{ post.postTitle }}</h1>
+              <p class="posts-date">
+                {{
+                  moment(new Date(post.postDate.toDate())).format(
+                    "MMM DD, HH:mm"
+                  )
+                }}
+              </p>
+              <p class="posts-excerpt">{{ post.postExcerpt }}</p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </TransitionGroup>
 </template>
 
 <style scoped lang="scss">
 @media (min-width: 1024px) {
-  .posts-loading {
-    top: 70px;
-    width: 100%;
-    height: calc(100vh - 70px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
-    transition: opacity 1s ease-in-out;
-
-    .circle {
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      display: inline-block;
-      border-top: 10px solid var(--color-nav-bg);
-      border-right: 10px solid transparent;
-      box-sizing: border-box;
-      animation: rotation 1s linear infinite;
-    }
-    .circle::after {
-      content: "";
-      box-sizing: border-box;
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      border-left: 10px solid var(--color-nav-bg);
-      border-bottom: 10px solid transparent;
-      animation: rotation 0.5s linear infinite reverse;
-    }
-    @keyframes rotation {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-  }
-  .errorCaught {
-    position: absolute;
-    width: 30%;
-    height: 100px;
-    top: calc(50% + 35px);
-    right: 50%;
-    transform: translate(50%, -50%);
-    background-color: rgb(146, 14, 14);
-    border-width: 10px;
-    padding: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 20px;
-    font-size: 2rem;
-    font-weight: 900;
-    animation: blink 2s infinite;
-  }
-  @keyframes blink {
-    0% {
-      opacity: 0;
-    }
-    50% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
   .blog-container {
     position: relative;
     min-height: 100vh;
@@ -243,9 +174,6 @@ onMounted(async () => {
           }
           .posts-date {
             font-style: italic;
-
-            .posts-excerpt {
-            }
           }
         }
       }
@@ -253,7 +181,7 @@ onMounted(async () => {
   }
   .fadeBlog-enter-active,
   .fadeBlog-leave-active {
-    transition: opacity 0.8s ease-in;
+    transition: opacity 0.2s ease-in;
   }
 
   .fadeBlog-enter-from,
@@ -262,7 +190,7 @@ onMounted(async () => {
   }
   .fadeLoading-enter-active,
   .fadeLoading-leave-active {
-    transition: opacity 0.8s ease-in;
+    transition: opacity 0.3s ease-in;
   }
 
   .fadeLoading-enter-from,

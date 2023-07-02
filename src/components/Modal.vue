@@ -96,6 +96,7 @@ const modalButton = modalButtonActive();
   left:0;
   font-size: 3rem;
   border-radius: 30px;
+  padding:30px;
   .modal-message {
     position: relative;
     height: 100%;

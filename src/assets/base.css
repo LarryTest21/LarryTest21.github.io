@@ -125,6 +125,10 @@ IMPORT FONTS
   animation: gradient2 0.8s ease forwards;
 }
 
+:root {
+  -ms-overflow-style: hide;
+}
+
 *,
 *::before,
 *::after {
@@ -141,6 +145,7 @@ body {
 
 #app {
   min-height: 100vh;
+  height: 100%;
   width: 100%;
   color: var(--color-text);
   background: var(--color-background);

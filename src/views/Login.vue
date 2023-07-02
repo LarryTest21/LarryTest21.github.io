@@ -21,15 +21,14 @@ const errorBFalse = () => {
   }
 };
 
-const auth = firebase.auth();
-
 const signIn = () => {
   firebase
     .auth()
     .signInWithEmailAndPassword(email.value, password.value)
     .then(() => {
       loggedIn.value = true;
-      localStorage.setItem("loggedIn", JSON.stringify(loggedIn.value));
+      localStorage.setItem("isLoggedIn", JSON.stringify(loggedIn.value));
+      localStorage.setItem("loggedInBefore", "true");
 
       router.push({ name: "landing" });
     })
@@ -104,8 +103,11 @@ const signIn = () => {
     img {
       width: 200px;
     }
+
     .inputs {
-      background-color: var(--color-nav-bg) !important;
+      background-color: var(--color-nav-bg);
+      border-radius: 10px;
+      box-shadow: 2px 2px 5px 5px rgba(255, 255, 255, 0.1);
       width: 50%;
       height: 300px;
       display: flex;
@@ -115,48 +117,51 @@ const signIn = () => {
       gap: 25px;
 
       .input {
+        position: relative;
         border-color: var(--vt-c-nav-text-bg-hover);
-        width: 50%;
         border-width: 2px;
-        border-style: default;
         border-radius: 5px;
         transition: width 0.1s ease-in-out;
         display: flex;
-        align-items: center;
-        justify-content: center;
 
         .icon {
           position: absolute;
-          height: 25px;
-          width: 25px;
-          left: 0px;
-          stroke-width: 2px;
+          bottom: 0;
+          height: 30px;
+          width: auto;
           fill: var(--color-nav-txt);
           z-index: 0;
+          left: 15px;
           pointer-events: none;
           transition: all 0.2s ease-in-out;
+          bottom: 3px;
         }
+
         input {
-          padding: 0 0 0 30px;
+          padding: 0 0 0 10px;
           width: 100%;
-          height: 30px;
+          height: 35px;
+          outline-style: solid;
           font-family: Chango;
           background: transparent;
-          border-style: none;
-          border-bottom: solid var(--color-nav-txt);
+          border: var(--color-nav-txt) solid 3px;
+          border-radius: 10px;
           outline: none;
-          transition: border-bottom 0.1s ease-in-out, width 0.1s ease-in;
+          transition: border 0.1s ease-in-out, width 0.1s ease-in;
           caret-color: var(--color-nav-txt);
         }
         input:active {
           width: 100%;
-          border-style: none;
           border-bottom: solid rgba(0, 70, 88, 0.192);
         }
         input:focus {
-          border-style: none;
+          border: transparent solid 10px;
           border-bottom: solid rgba(0, 70, 88, 0.192);
           width: 100%;
+        }
+        input:focus + .icon {
+          opacity: 0;
+          left:30px;
         }
       }
       input,

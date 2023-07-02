@@ -5,7 +5,7 @@ import VueCropper from "vue-cropperjs";
 import "cropperjs/dist/cropper.css";
 import db from "../firebase/firebaseInit";
 import VueDatePicker from "@vuepic/vue-datepicker";
-import "@/assets/vuepic.scss"
+import "@/assets/vuepic.scss";
 import Modal from "@/components/Modal.vue";
 import { updateCurrentUser } from "firebase/auth";
 import AskExcerpt from "@/components/CreatePostAskExcerpt.vue";
@@ -20,6 +20,8 @@ const props = defineProps({
   checkSavedPost: Boolean,
   rawImg: String,
   postID: String,
+  postSection: String,
+  postCategory: Array as any,
 });
 
 const emit = defineEmits([
@@ -34,15 +36,35 @@ const saveShow = ref();
 
 const date = ref() as any;
 
+
+const checkauth = () => {
+  
+};
+
 const postDate = ref();
 
 const postID = ref() as any;
 const savedPostID = ref(false);
+
 watch(
   () => props.postID,
   (newValue) => {
     postID.value = props.postID;
     savedPostID.value = true;
+  }
+);
+
+watch(
+  () => props.postSection,
+  (newValue) => {
+    console.log(newValue);
+  }
+);
+
+watch(
+  () => props.postCategory,
+  (newValue) => {
+    console.log(newValue);
   }
 );
 
@@ -73,14 +95,16 @@ watch(propRawImg, (newValue) => {
   if (newValue !== undefined || newValue !== null || newValue !== "") {
     rawImg.value = newValue;
     showCoverPreview.value = true;
+  } else {
+    rawImg.value = null;
   }
+  console.log(rawImg.value);
 });
 
 const datePicker = ref();
 const fileUpload = ref() as any;
 const coverFile = ref() as any;
 const rawImg = ref();
-const rawImg2 = ref();
 
 const excerpt = ref();
 const characterCounter = ref("70 characters left");
@@ -299,7 +323,9 @@ const savePost = () => {
 };
 
 const uploadPost = async () => {
-  if (postTitle.value == undefined) {
+  console.log(postTitle.value);
+
+  if (postTitle.value == undefined || postTitle.value == "") {
     error.value = true;
     errorMsg.value = "Give the post a title";
     modalActive.value = error.value;
@@ -312,14 +338,19 @@ const uploadPost = async () => {
     errorMsg.value = "Post content can not be empty";
     modalActive.value = error.value;
     modalLoadingMessage.value = errorMsg.value;
-  } else if (excerpt.value == undefined) {
+  } else if (excerpt.value == undefined || excerpt.value == "") {
     error.value = true;
     errorMsg.value = "Excerpt can not be empty";
     modalActive.value = error.value;
     modalLoadingMessage.value = errorMsg.value;
-  } else if (rawImg.value == undefined) {
+  } else if (props.postSection == undefined || props.postSection == "") {
     error.value = true;
-    errorMsg.value = "Cover Photo is needed";
+    errorMsg.value = "Section is needed";
+    modalActive.value = error.value;
+    modalLoadingMessage.value = errorMsg.value;
+  } else if (props.postCategory == undefined || props.postCategory == "[]") {
+    error.value = true;
+    errorMsg.value = "At least 1 category is needed";
     modalActive.value = error.value;
     modalLoadingMessage.value = errorMsg.value;
   } else {
@@ -330,36 +361,74 @@ const uploadPost = async () => {
       postID.value = new Date().valueOf().toString();
     }
 
-    const dataBase = db.collection("blogposts").doc(postID.value);
-    const coverImage = ref();
-    if (rawImg2.value == undefined) {
-      coverImage.value = null;
-    } else {
-      coverImage.value = rawImg2.value;
+    if (props.postSection == "Blog") {
+      const dataBase = db.collection("blogposts").doc(postID.value);
+      const coverImage = ref();
+      if (rawImg.value == undefined) {
+        coverImage.value = null;
+      } else {
+        coverImage.value = rawImg.value;
+      }
+      await dataBase
+        .set({
+          postID: postID.value,
+          postCategory: props.postCategory,
+          postSection: props.postSection,
+          coverImage: rawImg.value || null,
+          postDate: date.value,
+          postAuthor: props.postAuthor,
+          postTitle: postTitle.value,
+          postContent: postContent.value,
+          postExcerpt: excerpt.value,
+          lastUpload: new Date(),
+        })
+        .then(() => {
+          modalLoadingMessage.value = "Successfull Upload";
+          modalAnimation.value = false;
+        })
+        .catch((error) => {
+          modalLoadingMessage.value = error.msg;
+        })
+        .then(() => {
+          setTimeout(() => {
+            modalActive.value = false;
+          }, 1000);
+        });
     }
-    await dataBase
-      .set({
-        postID: postID.value,
-        coverImage: rawImg.value,
-        postDate: date.value,
-        postAuthor: props.postAuthor,
-        postTitle: postTitle.value,
-        postContent: postContent.value,
-        postExcerpt: excerpt.value,
-        lastUpload: new Date()
-      })
-      .then(() => {
-        modalLoadingMessage.value = "Successfull Upload";
-        modalAnimation.value = false;
-      })
-      .catch((error) => {
-        modalLoadingMessage.value = error.msg;
-      })
-      .then(() => {
-        setTimeout(() => {
-          modalActive.value = false;
-        }, 800);
-      });
+    if (props.postSection == "News") {
+      const dataBase = db.collection("news").doc(postID.value);
+      const coverImage = ref();
+      if (rawImg.value == undefined) {
+        coverImage.value = null;
+      } else {
+        coverImage.value = rawImg.value;
+      }
+      await dataBase
+        .set({
+          postID: postID.value,
+          postCategory: props.postCategory,
+          postSection: props.postSection,
+          coverImage: rawImg.value,
+          postDate: date.value,
+          postAuthor: props.postAuthor,
+          postTitle: postTitle.value,
+          postContent: postContent.value,
+          postExcerpt: excerpt.value,
+          lastUpload: new Date(),
+        })
+        .then(() => {
+          modalLoadingMessage.value = "Successfull Upload";
+          modalAnimation.value = false;
+        })
+        .catch((error) => {
+          modalLoadingMessage.value = error.msg;
+        })
+        .then(() => {
+          setTimeout(() => {
+            modalActive.value = false;
+          }, 1000);
+        });
+    }
   }
 };
 
@@ -567,6 +636,7 @@ onMounted(() => {});
           v-text="characterCounter"
           class="character-counter"
         />
+        <input @click="checkauth" type="button" value="hello" />
 
         <input
           type="button"

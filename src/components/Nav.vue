@@ -58,7 +58,7 @@ const userClick = userClicked();
 const initialName = ref();
 
 const loggedIn = ref();
-loggedIn.value = localStorage.getItem("loggedIn");
+loggedIn.value = localStorage.getItem("isLoggedIn");
 
 const activeLogin = () => {
   if (!activateLoginTab.value) {
@@ -208,7 +208,7 @@ onMounted(() => {
   onMountApp.value = true;
   getWeather();
   timeCurrent();
-  loginActivated.value = JSON.parse(localStorage.getItem("loggedIn")!);
+  loginActivated.value = JSON.parse(localStorage.getItem("loggedInBefore")!);
 
   gsap.from(".nav-links a", {
     delay: 0.3,
@@ -227,7 +227,6 @@ onMounted(() => {
         activateLoginTab.value = false;
       }
 
-      signedInCheck.state = true;
       var getInitials = function (name) {
         var parts = name.split(" ");
         var initials = "";
@@ -465,7 +464,6 @@ onMounted(() => {
         }
         .user-wrapper {
           cursor: pointer;
-          padding: 10px;
           display: flex;
           justify-content: center;
           align-items: center;

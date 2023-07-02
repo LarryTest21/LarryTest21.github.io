@@ -69,6 +69,8 @@ const logOut = () => {
   const { signedInFalse } = signedInCheck;
   signedInFalse();
   firebase.auth().signOut();
+  localStorage.setItem("isLoggedIn", JSON.stringify(false));
+
 
   if (
     route.name === "profile" ||
