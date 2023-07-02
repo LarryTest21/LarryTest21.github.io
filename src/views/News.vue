@@ -5,7 +5,7 @@ import moment from "moment";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import db from "../firebase/firebaseInit";
-import SonarLoading from "@/components/SonarLoading.vue"
+import SonarLoading from "@/components/SonarLoading.vue";
 
 const isLoading = ref(false);
 const errorCaught = ref(false);
@@ -13,15 +13,12 @@ const colRef = firebase.firestore().collection("news");
 const newsPosts = ref([]) as any;
 
 async function getPosts() {
-  
   colRef
     .get()
     .then((querySnapshot) =>
       querySnapshot.forEach((post) => {
         const check = post.data();
-        console.log(check);
         newsPosts.value.push(check);
-        console.log(newsPosts.value);
       })
     )
     .catch((err) => {
@@ -41,12 +38,7 @@ onMounted(async () => {
 
 <template>
   <transition name="fadeLoading">
-<SonarLoading v-if="isLoading"/>
-  </transition>
-  <transition name="fadeLoading">
-    <div class="errorCaught" v-if="errorCaught">
-      There was an error loading news
-    </div>
+    <SonarLoading v-if="isLoading" />
   </transition>
   <div class="blog-container">
     <div class="wrapper">
@@ -94,7 +86,6 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 @media (min-width: 1024px) {
-  
   .errorCaught {
     position: absolute;
     width: 30%;

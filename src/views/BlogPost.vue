@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, watch, onBeforeUnmount, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import moment from "moment";
 import $ from "jquery";
@@ -9,14 +9,13 @@ import "firebase/compat/auth";
 import SideBar from "@/components/PostSideBar.vue";
 
 const route = useRoute();
-const post = ref<any>({});
-const isLoading = ref(false);
-const latestPosts = ref<any>({});
-const blogPost = ref([]) as any;
-
-const postSlug = ref(route.params.blogSlug) as any;
 const colRef = firebase.firestore().collection("blogposts");
+
+const isLoading = ref(false);
+
 const blogPosts = ref([]) as any;
+const sidebar = ref();
+const postSlug = ref(route.params.blogSlug) as any;
 
 const postTitle = ref();
 const postAuthor = ref();
@@ -24,37 +23,35 @@ const postDate = ref();
 const postContent = ref();
 const coverImage = ref();
 const postCategory = ref([]) as any;
-const newArray = ref([]);
-const postSideBar = ref();
-const sidebar = ref();
+const singlePost = ref([]) as any;
+
+const componentKey = ref(0)
+
+postSlug.value = route.params.blogSlug;
 
 async function fetchData() {
   isLoading.value = true;
-  blogPosts.value = [];
-  postSlug.value = route.params.blogSlug;
   colRef
     .get()
     .then((querySnapshot) =>
       querySnapshot.forEach((post) => {
-        const check = post.data();
-        blogPosts.value.push(check);
+        const check1 = post.data();
+        blogPosts.value.push(check1);
       })
     )
     .then(() => {
-      newArray.value = blogPosts.value.filter(
+      singlePost.value = blogPosts.value.filter(
         (item) => item.postID === postSlug.value
       );
 
-      blogPost.value = newArray.value;
-      postSideBar.value = "blog";
-      postTitle.value = blogPost.value[0].postTitle;
-      postAuthor.value = blogPost.value[0].postAuthor;
+      postTitle.value = singlePost.value[0].postTitle;
+      postAuthor.value = singlePost.value[0].postAuthor;
       postDate.value = moment(
-        new Date(blogPost.value[0].postDate.toDate())
+        new Date(singlePost.value[0].postDate.toDate())
       ).format("MMM, DD\xa0\xa0\xa0HH:mm");
-      postContent.value = blogPost.value[0].postContent;
-      coverImage.value = blogPost.value[0].coverImage;
-      postCategory.value = blogPost.value[0].postCategory[0];
+      postContent.value = singlePost.value[0].postContent;
+      coverImage.value = singlePost.value[0].coverImage;
+      postCategory.value = singlePost.value[0].postCategory[0];
     })
     .catch((err) => {
       console.log(err);
@@ -65,17 +62,14 @@ async function fetchData() {
 }
 fetchData();
 
-async function fetchDataSideBar() {}
-
 watch(
   () => route.params.blogSlug,
   () => {
-    postSlug.value = route.params.blogSlug;
-    /*  getPost(); */
+    postSlug.value = route.params.blogSlug
+    blogPosts.value = [];
     fetchData();
   }
 );
-
 const scrollTopp = ref();
 
 function logScroll() {
@@ -93,8 +87,7 @@ function logScroll() {
     sidebar2.style.position = "absolute";
     sidebar2.style.top = "400px";
   } else if (toBottom) {
-    sidebar2.style.top = scrollTopp.value / 5 + scrollTopp.value + "px";
-    console.log(scrollTopp.value);
+    sidebar2.style.top = scrollTopp.value + 110 + "px";
   }
 }
 
@@ -109,7 +102,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div v-if="!isLoading" class="posts-wrapper">
-    <div class="blogpost-wrapper">
+    <div class="blogpost-wrapper" ref="postWrapper">
       <div class="post-title">
         {{ postTitle }}
         <div class="post-category">
@@ -118,17 +111,16 @@ onBeforeUnmount(() => {
       </div>
       <div class="post-date">{{ postDate }}</div>
       <div class="post-author">{{ postAuthor }}</div>
-
+      <img :src="coverImage" alt="" />
       <div class="post-content" v-html="postContent"></div>
     </div>
+    <SideBar
+      ref="sidebar"
+      class="sidebar"
+      :Posts="blogPosts"
+      :Slug="postSlug"
+    />
   </div>
-  <SideBar
-    ref="sidebar"
-    class="sidebar"
-    :Posts="blogPosts"
-    :Slug="postSlug"
-    :postSideBar="postSideBar"
-  />
 </template>
 
 <style scoped lang="scss">

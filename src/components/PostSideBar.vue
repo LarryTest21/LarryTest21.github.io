@@ -1,37 +1,36 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
+
 import moment from "moment";
 import $ from "jquery";
 import "jquery";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 
-const sidebar = ref()
+const route = useRoute();
 
+const sidebar = ref();
 
 defineExpose({
-sidebar
-})
+  sidebar,
+});
 
 const props = defineProps({
   Slug: String,
   Posts: Array,
-  postSideBar: String,
 });
 
-const isLoading = ref(false);
-const Posts = ref(props.Posts) as any;
 const sideBarPosts = ref(props.Posts) as any;
-watch(
-  () => props.postSideBar,
-  () => {
-    sideBarPosts.value = []
-    sideBarPosts.value = Posts.value.filter(
-      (item) => item.postID !== props.Slug
-    );
-  }
-);
+const sideBarPostsFiltered = ref([]) as any;
+const postSlug = ref(props.Slug);
+sideBarPostsFiltered.value = sideBarPosts.value;
+sideBarPosts.value = props.Posts;
+postSlug.value = props.Slug;
+
+sideBarPosts.value = sideBarPosts.value.filter(
+    (item) => item.postID !== props.Slug,
+  );
 
 </script>
 
@@ -39,7 +38,6 @@ watch(
   <div class="side-container" ref="sidebar">
     <div class="side-wrapper">
       <ul
-        v-if="!isLoading"
         class="blog-posts-ul"
         v-for="latest in sideBarPosts"
       >
@@ -88,9 +86,11 @@ watch(
   .side-wrapper {
     position: sticky;
     .blog-posts-ul {
+      position: relative;
       display: flex;
 
       .posts-card {
+        position: relative;
         height: 100px;
         width: 280px;
         display: flex;

@@ -9,12 +9,13 @@ import "firebase/compat/auth";
 import SideBar from "@/components/PostSideBar.vue";
 
 const route = useRoute();
+const colRef = firebase.firestore().collection("news");
+
 const isLoading = ref(false);
+
 const newsPosts = ref([]) as any;
 const sidebar = ref();
 const postSlug = ref(route.params.newsSlug) as any;
-const colRef = firebase.firestore().collection("news");
-const blogPosts = ref([]) as any;
 
 const postTitle = ref();
 const postAuthor = ref();
@@ -23,13 +24,11 @@ const postContent = ref();
 const coverImage = ref();
 const postCategory = ref([]) as any;
 const singlePost = ref([]) as any;
-const postSideBar = ref();
 
 postSlug.value = route.params.newsSlug;
 
 async function fetchData() {
   isLoading.value = true;
-  blogPosts.value = [];
   postSlug.value = route.params.newsSlug;
   colRef
     .get()
@@ -37,8 +36,6 @@ async function fetchData() {
       querySnapshot.forEach((post) => {
         const check1 = post.data();
         newsPosts.value.push(check1);
-        postSideBar.value = "news"
-
       })
     )
     .then(() => {
@@ -54,9 +51,6 @@ async function fetchData() {
       postContent.value = singlePost.value[0].postContent;
       coverImage.value = singlePost.value[0].coverImage;
       postCategory.value = singlePost.value[0].postCategory[0];
-      newsPosts.value = newsPosts.value.filter(
-        (item) => item.postID !== postSlug.value
-      );
     })
     .catch((err) => {
       console.log(err);
@@ -70,13 +64,12 @@ fetchData();
 watch(
   () => route.params.newsSlug,
   () => {
+    postSlug.value = route.params.newsSlug;
     newsPosts.value = [];
     fetchData();
   }
 );
 const scrollTopp = ref();
-const postWrapper = ref();
-
 
 function logScroll() {
   const sidebar2 = sidebar.value.sidebar;
@@ -105,7 +98,6 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener("scroll", logScroll);
 });
-
 </script>
 
 <template>
@@ -127,7 +119,6 @@ onBeforeUnmount(() => {
       class="sidebar"
       :Posts="newsPosts"
       :Slug="postSlug"
-      :postSideBar="postSideBar"
     />
   </div>
 </template>
@@ -331,8 +322,8 @@ onBeforeUnmount(() => {
   }
 }
 .sidebar {
-    position: absolute;
-    right:0;
-    top:400px;
-  }
+  position: absolute;
+  right: 0;
+  top: 400px;
+}
 </style>

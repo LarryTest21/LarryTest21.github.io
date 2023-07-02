@@ -408,7 +408,7 @@ const uploadPost = async () => {
           postID: postID.value,
           postCategory: props.postCategory,
           postSection: props.postSection,
-          coverImage: rawImg.value,
+          coverImage: rawImg.value || null,
           postDate: date.value,
           postAuthor: props.postAuthor,
           postTitle: postTitle.value,

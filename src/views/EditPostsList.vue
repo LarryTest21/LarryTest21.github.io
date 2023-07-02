@@ -23,6 +23,8 @@ const showBlogPostsRefresh = ref(false);
 const blogPosts = ref([]) as any;
 const newsPosts = ref([]) as any;
 
+const postKind = ref();
+
 const blogRef = firebase.firestore().collection("blogposts");
 const newsRef = firebase.firestore().collection("news");
 
@@ -33,10 +35,24 @@ const transitionList = ref() as any;
 const showNews = ref(false);
 const showBlog = ref(false);
 
-const deletePost = async (postID, post) => {
-  blogPosts.value.splice(post, 1);
+watch(showNews, () => {
+  console.log(showNews.value);
+  if (showNews) {
+    postKind.value = "news";
+  } else {
+    postKind.value = "blogposts";
+  }
+});
 
-  await deleteDoc(doc(db, "blogposts", postID.postID.toString()));
+const deletePost = async (postID, post) => {
+  if (postKind.value = "blogposts") {
+    blogPosts.value.splice(post, 1);
+  }
+  if (postKind.value = "news") {
+    newsPosts.value.splice(post, 1);
+  }
+
+  await deleteDoc(doc(db, postKind.value, postID.postID.toString()));
   console.log(postID.postID);
 };
 
