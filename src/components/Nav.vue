@@ -21,7 +21,7 @@ const Logo = new URL('../assets/logos/logo.svg', import.meta.url).href
 
 //FETCHING LOCATION FOR LANGUAGE
 
-var requestUrl = "http://ip-api.com/json";
+var requestUrl = "https://ip-api.com/json";
 
 $.ajax({
   url: requestUrl,

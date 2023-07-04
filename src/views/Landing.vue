@@ -204,45 +204,7 @@ onMounted(() => {
 
   fetchIamges().then(() => {
     $(".image-carousel:first").addClass("active");
-    /*     function imageChange() {
-      console.log()
-      if (!imageStart.value) {
-        clearInterval(imageGoing);
-      } else {
-        var hoverWithin;
-        if (hover.value) {
-          clearInterval(imageGoing);
-
-          function hoverInt () {
-            console.log("hoverInt")
-            if (hover.value) {
-
-            }  else {
-              clearInterval(hoverWithin);
-              imageGoing = setInterval(imageChange, 3000)
-            }
-          }
-
-          hoverWithin = setInterval(hoverInt, 500)
-
-          setInterval(() => {
-            if (hover.value) {
-            } else {
-              imageGoing = setInterval(imageChange, 3000);
-
-            }
-          }, 500); 
-        } else {
-          var $target = $(".image-carousel.active").next();
-          if ($target.length == 0) {
-            $target = $(".image-carousel:first").addClass("active");
-          }
-
-          $(".image-carousel.active").removeClass("active");
-          $target.addClass("active");
-        }
-      }
-    } */
+   
 
     const sections = document.querySelectorAll(".section-landing");
     const options = {

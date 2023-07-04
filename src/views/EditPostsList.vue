@@ -45,10 +45,10 @@ watch(showNews, () => {
 });
 
 const deletePost = async (postID, post) => {
-  if (postKind.value = "blogposts") {
+  if ((postKind.value = "blogposts")) {
     blogPosts.value.splice(post, 1);
   }
-  if (postKind.value = "news") {
+  if ((postKind.value = "news")) {
     newsPosts.value.splice(post, 1);
   }
 
@@ -196,32 +196,35 @@ const buttonClear = () => {
 <template>
   <div class="editposts-wrapper">
     <div class="edit-posts-inner">
-      <div class="change-buttons">
-        <input
-          type="button"
-          @click="
-            showNews = !showNews;
-            showBlog = false;
-          "
-          value="News"
-        />
-        <input
-          type="button"
-          @click="
-            showBlog = !showBlog;
-            showNews = false;
-          "
-          value="Blog"
-        />
+      <div class="buttons">
+        <div class="news-blog">
+          <input
+            type="button"
+            @click="
+              showNews = !showNews;
+              showBlog = false;
+            "
+            value="News"
+          />
+          <input
+            type="button"
+            @click="
+              showBlog = !showBlog;
+              showNews = false;
+            "
+            value="Blog"
+          />
+        </div>
+        <div class="newpost-wrapper">
+          <input
+            class="create-new-post"
+            type="button"
+            @click="$router.push('/createpost/newPost')"
+            value="+ Create Post"
+          />
+        </div>
       </div>
-      <div class="newpost-wrapper">
-        <input
-          class="create-new-post"
-          type="button"
-          @click="$router.push('/createpost/newPost')"
-          value="+ Create Post"
-        />
-      </div>
+
       <div class="posts-wrapper">
         <TransitionGroup name="fade">
           <div
@@ -374,46 +377,45 @@ input[type="button"]:active {
 }
 .editposts-wrapper {
   position: relative;
-  height: 100%;
+  min-height: 100vh;
   width: 100%;
   font-family: Roboto Condensed;
   font-size: 1rem;
   .edit-posts-inner {
     position: relative;
-    height: calc(100% - 70px);
-    padding-top: 80px;
     left: 0;
     right: 0;
+    top: 70px;
     margin: auto;
+    padding: 30px;
     width: 70%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    .change-buttons {
+    .buttons {
       position: relative;
-      display: flex;
-      gap: 30px;
-    }
-    .newpost-wrapper {
-      height: 100%;
       width: 100%;
-      margin: 30px;
-      position: relative;
       display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      input[type="button"]:hover {
-        color: var(--color-nav-bg) !important;
-        background-color: green;
+      justify-content: space-around;
+      gap: 30px;
+      .news-blog{
+        display: flex;
+        gap:30px;
       }
-      .create-new-post {
+      .newpost-wrapper {
         position: relative;
+        input[type="button"]:hover {
+          color: var(--color-nav-bg) !important;
+          background-color: green;
+        }
+        .create-new-post {
+          position: relative;
+        }
       }
     }
 
     .posts-wrapper {
-      transition: opacity 0.5s linear;
       position: relative;
       min-height: 100%;
       width: 70%;
@@ -423,7 +425,6 @@ input[type="button"]:active {
       gap: 30px;
 
       .posts-card {
-        transition: opacity 0.3s ease-in, transform 0.3s ease-in;
         position: relative;
         display: flex;
         width: 80%;
@@ -460,7 +461,6 @@ input[type="button"]:active {
           .blogposts-meta {
             width: 100%;
             transition: opacity 0.5s linear;
-
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -475,7 +475,6 @@ input[type="button"]:active {
         }
         .functions {
           transition: opacity 0.5s linear;
-
           position: relative;
           display: flex;
           flex-direction: row;
@@ -504,6 +503,8 @@ input[type="button"]:active {
 
 .fade-enter-active,
 .fade-leave-active {
+  transition: opacity 0.8s;
+
 }
 
 .fade-enter-from,
