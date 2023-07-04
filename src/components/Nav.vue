@@ -169,7 +169,7 @@ function timeCurrent() {
 timeCurrent();
 
 //WEATHER SCRIPT
-var getIP = "https://ip-api.com/json/";
+var getIP = "https://geolocation-db.com/jsonp/";
 var openWeatherMap = "http://api.openweathermap.org/data/2.5/weather";
 
 
@@ -179,8 +179,8 @@ var openWeatherMap = "http://api.openweathermap.org/data/2.5/weather";
 const getWeather = () => {
   $.getJSON(getIP).done(function (location) {
     $.getJSON(openWeatherMap, {
-      lat: location.lat,
-      lon: location.lon,
+      lat: location.latitude,
+      lon: location.longitude,
       units: "metric",
       APPID: "20fd3e315880d30f3beed6621ed06ee1",
     }).done(function (weather) {
