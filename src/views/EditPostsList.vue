@@ -44,6 +44,22 @@ watch(showNews, () => {
   }
 });
 
+const showNewsButton = () => {
+  clearInterval(intervalID.value);
+
+  intervalID.value = setInterval(refreshNewsPostRequest, 2000);
+  showNews.value = true;
+  showBlog.value = false;
+};
+
+const showBlogButton = () => {
+  clearInterval(intervalID.value);
+
+  intervalID.value = setInterval(refreshBlogPostRequest, 2000);
+  showNews.value = false;
+  showBlog.value = true;
+};
+
 const deletePost = async (postID, post) => {
   if ((postKind.value = "blogposts")) {
     blogPosts.value.splice(post, 1);
@@ -56,10 +72,46 @@ const deletePost = async (postID, post) => {
   console.log(postID.postID);
 };
 
+const initialNewsPostRequest = async () => {
+  newsPostsRefreshed.value = true;
+
+  await newsRef
+    .get()
+    .then((querySnapshot) =>
+      querySnapshot.forEach((post) => {
+        const check = post.data();
+        newsPosts.value.push(check);
+      })
+    )
+    .catch((err) => {
+      console.log(err);
+    })
+    .then(() => {
+      changeStateFalse();
+    });
+};
+
+const initialBlogPostRequest =async ()  => {
+  blogPostsRefreshed.value = true;
+
+  await blogRef
+    .get()
+    .then((querySnapshot) =>
+      querySnapshot.forEach((post) => {
+        const check = post.data();
+        blogPosts.value.push(check);
+      })
+    )
+    .catch((err) => {
+      console.log(err);
+    })
+    .then(() => {
+      changeStateFalse();
+    });
+};
 const refreshNewsPostRequest = () => {
   transitionList.value = "fadePosts";
   console.log("posts refreshing");
-  clearInterval(intervalID.value);
 
   newsRef
     .get()
@@ -86,7 +138,8 @@ const refreshNewsPostRequest = () => {
     )
     .then(() => {
       if (newsDifferencePosts.value !== undefined) {
-        if (differencePosts.value.length !== 0) {
+
+        if (newsDifferencePosts.value.length !== 0) {
           newsPostsRefreshArray.value = [];
           showBlogPostsRefresh.value = false;
         }
@@ -95,32 +148,10 @@ const refreshNewsPostRequest = () => {
       }
     });
 };
-const initialNewsPostRequest = () => {
-  clearInterval(intervalID.value);
-  newsPostsRefreshed.value = true;
-
-  newsRef
-    .get()
-    .then((querySnapshot) =>
-      querySnapshot.forEach((post) => {
-        const check = post.data();
-        newsPosts.value.push(check);
-      })
-    )
-    .catch((err) => {
-      console.log(err);
-    })
-    .then(() => {
-      intervalID.value = setInterval(refreshNewsPostRequest, 2000);
-      changeStateFalse();
-    });
-};
 
 const refreshBlogPostRequest = () => {
   transitionList.value = "fadePosts";
   console.log("posts refreshing");
-  clearInterval(intervalID.value);
-
   blogRef
     .get()
     .then((querySnapshot) =>
@@ -155,42 +186,20 @@ const refreshBlogPostRequest = () => {
       }
     });
 };
-const initialBlogPostRequest = () => {
-  clearInterval(intervalID.value);
-  blogPostsRefreshed.value = true;
-
-  blogRef
-    .get()
-    .then((querySnapshot) =>
-      querySnapshot.forEach((post) => {
-        const check = post.data();
-        blogPosts.value.push(check);
-      })
-    )
-    .catch((err) => {
-      console.log(err);
-    })
-    .then(() => {
-      intervalID.value = setInterval(refreshBlogPostRequest, 2000);
-      changeStateFalse();
-    });
-};
 
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
-    initialBlogPostRequest();
-    initialNewsPostRequest();
   }
 });
 
-onMounted(() => {});
+onMounted(() => {
+  initialBlogPostRequest();
+  initialNewsPostRequest();
+});
 
 onUnmounted(() => {
   clearInterval(intervalID.value);
 });
-const buttonClear = () => {
-  clearInterval(intervalID.value);
-};
 </script>
 
 <template>
@@ -198,22 +207,8 @@ const buttonClear = () => {
     <div class="edit-posts-inner">
       <div class="buttons">
         <div class="news-blog">
-          <input
-            type="button"
-            @click="
-              showNews = !showNews;
-              showBlog = false;
-            "
-            value="News"
-          />
-          <input
-            type="button"
-            @click="
-              showBlog = !showBlog;
-              showNews = false;
-            "
-            value="Blog"
-          />
+          <input type="button" @click="showNewsButton" value="News" />
+          <input type="button" @click="showBlogButton" value="Blog" />
         </div>
         <div class="newpost-wrapper">
           <input
@@ -399,9 +394,9 @@ input[type="button"]:active {
       display: flex;
       justify-content: space-around;
       gap: 30px;
-      .news-blog{
+      .news-blog {
         display: flex;
-        gap:30px;
+        gap: 30px;
       }
       .newpost-wrapper {
         position: relative;
@@ -504,7 +499,6 @@ input[type="button"]:active {
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.8s;
-
 }
 
 .fade-enter-from,

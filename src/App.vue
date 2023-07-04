@@ -2,22 +2,18 @@
 import { RouterView } from "vue-router";
 import { ref, watch, onMounted } from "vue";
 import PreLoader from "@/components/PreLoader.vue";
-import { useLoaderState } from "./store/isloading";
-import { useTheme } from "./store/theme";
+import { useLoaderState } from "@/store/isloading";
+import { useTheme } from "@/store/theme";
 import Nav from "@/components/Nav.vue";
 import MobileNav from "@/components/MobileNav.vue";
 import MobileNavIcon from "@/components/MobileNavIcon.vue";
 import { useRoute } from "vue-router";
-import { modalActive } from "./store/modalActive";
-import { userClicked } from "@/store/userClicked";
 import "firebase/compat/auth";
 import { mobileIconClicked } from "@/store/mobileIconClicked";
-import $ from "jquery";
-import { onMountApp } from "./store/onMountApp";
+import { onMountApp } from "@/store/onMountApp";
 
 const mobileNav = ref();
 const mobileNavButton = ref(false);
-const userClickTab = userClicked();
 const showNav = ref(false);
 var windowWidth = document.documentElement.clientWidth;
 
@@ -47,12 +43,10 @@ const route = useRoute();
 const navigation = ref(false);
 const currentTheme = useTheme();
 
-var animDark = "";
 
 const isLoading = useLoaderState();
 const mountApp = onMountApp();
 mountApp.state = false;
-const modalActivation = modalActive();
 
 const checkRoute = () => {
   navigation.value = true;

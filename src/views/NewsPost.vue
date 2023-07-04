@@ -7,9 +7,14 @@ import "jquery";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import SideBar from "@/components/PostSideBar.vue";
+import { postLoaded } from "@/store/postLoaded";
 
 const route = useRoute();
 const colRef = firebase.firestore().collection("news");
+
+const postLoadedChange = postLoaded();
+const { postStateTrue } = postLoadedChange;
+const { postStateFalse } = postLoadedChange;
 
 const isLoading = ref(false);
 
@@ -29,6 +34,7 @@ postSlug.value = route.params.newsSlug;
 
 async function fetchData() {
   isLoading.value = true;
+  postStateFalse();
   postSlug.value = route.params.newsSlug;
   colRef
     .get()
@@ -56,7 +62,8 @@ async function fetchData() {
       console.log(err);
     })
     .then(() => {
-      isLoading.value = false;
+      isLoading.value = false; 
+      postStateTrue();
     });
 }
 fetchData();
