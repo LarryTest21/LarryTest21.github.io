@@ -167,7 +167,7 @@ timeCurrent();
 
 //WEATHER SCRIPT
 var getIP = "https://geolocation-db.com/json/";
-var openWeatherMap = "http://api.openweathermap.org/data/2.5/weather";
+var openWeatherMap = "https://api.openweathermap.org/data/2.5/weather";
 const location2 = ref()
 
 const city = ref()
