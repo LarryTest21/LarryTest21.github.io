@@ -23,6 +23,9 @@ const Logo = new URL('../assets/logos/logo.svg', import.meta.url).href
 
 var requestUrl = "https://ip-api.com/json";
 
+
+
+
 $.ajax({
   url: requestUrl,
   type: "GET",
@@ -166,8 +169,12 @@ function timeCurrent() {
 timeCurrent();
 
 //WEATHER SCRIPT
-var getIP = "http://ip-api.com/json/";
+var getIP = "https://ip-api.com/json/";
 var openWeatherMap = "http://api.openweathermap.org/data/2.5/weather";
+
+
+
+
 
 const getWeather = () => {
   $.getJSON(getIP).done(function (location) {
@@ -260,11 +267,10 @@ onMounted(() => {
         <ul class="nav-links">
           <RouterLink to="/">
             <div class="nav-logo">
-              <img  class="logo" :src="Logo" />
-
+              <img class="logo" :src="Logo" />
             </div>
           </RouterLink>
-          <div class="user-wrapper" >
+          <div class="user-wrapper">
             <TransitionGroup name="user">
               <a
                 key="2"
