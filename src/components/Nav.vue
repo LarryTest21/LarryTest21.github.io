@@ -17,20 +17,17 @@ import Hungaryflag from "@/assets/logos/Hungary_Flag.svg";
 const langEn = ref(false) as any;
 const langHu = ref(false) as any;
 
-const Logo = new URL('../assets/logos/logo.svg', import.meta.url).href
+const Logo = new URL("../assets/logos/logo.svg", import.meta.url).href;
 
 //FETCHING LOCATION FOR LANGUAGE
 
-var requestUrl = "https://ip-api.com/json";
-
-
-
+var requestUrl = "https://geolocation-db.com/json/";
 
 $.ajax({
   url: requestUrl,
   type: "GET",
   success: function (json) {
-    if (json.country == "Hungary") {
+    if (json.country_name == "Hungary") {
       langHu.value = true;
     } else {
       langEn.value = true;
@@ -169,33 +166,48 @@ function timeCurrent() {
 timeCurrent();
 
 //WEATHER SCRIPT
-var getIP = "https://geolocation-db.com/jsonp/";
+var getIP = "https://geolocation-db.com/json/";
 var openWeatherMap = "http://api.openweathermap.org/data/2.5/weather";
+const location2 = ref()
+
+const city = ref()
+const temp = ref()
 
 
-
-
-
-const getWeather = () => {
-  $.getJSON(getIP).done(function (location) {
+const getWeather2 = () => {
+    $.getJSON(getIP).done(function (location) {
     $.getJSON(openWeatherMap, {
       lat: location.latitude,
       lon: location.longitude,
       units: "metric",
       APPID: "20fd3e315880d30f3beed6621ed06ee1",
     }).done(function (weather) {
-      0;
-      $(".weather").append(
-        location.city +
-          "," +
-          " " +
-          Math.round(weather.main.temp) +
-          " " +
-          "Celsius"
-      );
+      city.value = location.city
+      temp.value = Math.round(weather.main.temp)
     });
   });
 };
+
+// const getWeather = () => {
+//   $.getJSON(getIP).done(function (location) {
+//     $.getJSON(openWeatherMap, {
+//       lat: location.latitude,
+//       lon: location.longitude,
+//       units: "metric",
+//       APPID: "20fd3e315880d30f3beed6621ed06ee1",
+//     }).done(function (weather) {
+//       0;
+//       $(".weather").append(
+//         location.city +
+//           "," +
+//           " " +
+//           Math.round(weather.main.temp) +
+//           " " +
+//           "Celsius"
+//       );
+//     });
+//   });
+// };
 
 //WEATHER HOVERING
 const weatherHovered = () => {
@@ -213,7 +225,7 @@ const UserTabHeight = ref();
 //START ON MOUNT
 onMounted(() => {
   onMountApp.value = true;
-  getWeather();
+  getWeather2();
   timeCurrent();
   loginActivated.value = JSON.parse(localStorage.getItem("loggedInBefore")!);
 
@@ -310,7 +322,10 @@ onMounted(() => {
             ]"
           >
             <div class="time">{{ time }}</div>
-            <div class="weather"></div>
+            <div class="weather">
+              <div class="city">{{ city }}</div>
+              <div class="temp">{{ temp }} Celsius</div>
+            </div>
           </div>
         </div>
         <div class="language-wrapper"></div>
@@ -516,7 +531,6 @@ onMounted(() => {
   }
   .wt-wrapper {
     height: 100%;
-    width: 130px;
     overflow: hidden;
     .weather-time {
       top: -35px;
@@ -534,9 +548,13 @@ onMounted(() => {
         height: 50%;
         text-align: center;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         align-content: center;
+        div {
+          width: 100%;
+        }
       }
       .time {
         width: 100%;
