@@ -29,7 +29,6 @@
 
     .outer {
       background: rgba($color: #000000, $alpha: .5);
-
       position: relative;
       height: 100%;
       width: 100%

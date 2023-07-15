@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import nameSVG from "../components/icons/user.vue";
-import userSVG from "../components/icons/user.vue";
-import emailSVG from "../components/icons/email.vue";
-import passwordSVG from "../components/icons/password.vue";
-import firebase from 'firebase/compat/app';
+import nameSVG from "@/components/icons/user.vue";
+import userSVG from "@/components/icons/user.vue";
+import emailSVG from "@/components/icons/email.vue";
+import passwordSVG from "@/components/icons/password.vue";
+import firebase from "firebase/compat/app";
 import "firebase/auth";
 import db from "../firebase/firebaseInit";
 import router from "../router";
@@ -175,6 +175,7 @@ const register = async () => {
     align-content: center;
     padding: 10px;
     gap: 50px;
+    position: relative;
 
     img {
       width: 200px;
@@ -189,10 +190,12 @@ const register = async () => {
       justify-content: center;
       align-items: center;
       gap: 15px;
+      position: relative;
 
       .input {
+        position: relative;
         border-color: var(--vt-c-nav-text-bg-hover);
-        width: 80%;
+        width: 60%;
         border-width: 2px;
         border-style: default;
         border-radius: 5px;
@@ -204,19 +207,20 @@ const register = async () => {
         .icon {
           position: absolute;
           width: 30px;
-          height: 15px;
+          height: 20px;
           stroke-width: 2px;
           fill: var(--color-nav-txt);
           z-index: 0;
           pointer-events: none;
           transition: all 0.2s ease-in-out;
-          left: 10%;
+          left: -25px;
+          bottom:0;
         }
         input {
           font-family: Chango;
           font-size: 0.8rem;
           padding: 0 0 0 20px;
-          width: 70%;
+          width: 100%;
           height: 30px;
           background: transparent;
           border-style: none;
@@ -226,17 +230,15 @@ const register = async () => {
           caret-color: var(--color-nav-txt);
         }
         input:active {
-          width: 70%;
           border-style: none;
           border-bottom: solid rgba(0, 70, 88, 0.192);
         }
         input:focus {
           border-style: none;
           border-bottom: solid rgba(0, 70, 88, 0.192);
-          width: 70%;
         }
         input:focus + .icon {
-          transform: translate(-390%, 0%);
+          opacity:0;
         }
       }
       input,

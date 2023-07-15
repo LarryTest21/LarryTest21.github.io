@@ -16,6 +16,11 @@ const route = useRoute();
 const userEmail = ref();
 const displayName = ref();
 
+
+const props = defineProps({
+  isAdminCheck: String,
+})
+
 const modalActivation = ref(false);
 const modalAnimation = ref(true);
 
@@ -69,8 +74,8 @@ const logOut = () => {
   const { signedInFalse } = signedInCheck;
   signedInFalse();
   firebase.auth().signOut();
-  localStorage.setItem("isLoggedIn", JSON.stringify(false));
-
+  localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("userClearance");
 
   if (
     route.name === "profile" ||
@@ -109,6 +114,9 @@ const logOut = () => {
       >
       <router-link @click.native.prevent="userClick" to="/editpostslist"
         >Edit Posts</router-link
+      >
+      <router-link @click.native.prevent="userClick" to="/adminpage" v-if="props.isAdminCheck === 'admin'"
+        >Admin Page</router-link
       >
       <a @click.stop.prevent="logOut()">Logout</a>
     </div>

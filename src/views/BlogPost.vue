@@ -25,7 +25,7 @@ const coverImage = ref();
 const postCategory = ref([]) as any;
 const singlePost = ref([]) as any;
 
-const componentKey = ref(0)
+const componentKey = ref(0);
 
 postSlug.value = route.params.blogSlug;
 
@@ -65,7 +65,7 @@ fetchData();
 watch(
   () => route.params.blogSlug,
   () => {
-    postSlug.value = route.params.blogSlug
+    postSlug.value = route.params.blogSlug;
     blogPosts.value = [];
     fetchData();
   }

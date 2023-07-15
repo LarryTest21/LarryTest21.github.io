@@ -2,22 +2,47 @@
 import "firebase/compat/auth";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import router from "@/router";
-import emailSVG from "../components/icons/email.vue";
-import passwordSVG from "../components/icons/password.vue";
+import emailSVG from "../components/icons/user.vue";
+import passwordSVG from "@/components/icons/password.vue";
+import $ from "jquery";
 
 const email = ref();
 const password = ref();
 const loggedIn = ref(false);
 
+const writtenEmail = ref(true);
+const writtenPw = ref(true);
+
+const emailRef = ref();
+const passwordRef = ref();
+
 const errorB = ref(false);
 const errorMessage = ref();
 
 const errorBFalse = () => {
-  console.log(errorB);
   if (errorB.value) {
     errorB.value = false;
+  }
+
+  if (email.value !== undefined) {
+    if (email.value.length !== 0) {
+      writtenEmail.value = false;
+    }
+    if (email.value.length === 0) {
+      writtenEmail.value = true;
+    }
+  }
+
+  if (password.value !== undefined) {
+    if (password.value.length !== 0) {
+      writtenPw.value = false;
+    }
+    console.log(password.value.length)
+    if (password.value.length === 0) {
+      writtenPw.value = true;
+    }
   }
 };
 
@@ -50,25 +75,28 @@ const signIn = () => {
   <div class="form-wrap">
     <img src="../assets/logos/logo.svg" alt="" />
     <div class="inputs">
-      <div class="input">
-        <input
-          type="text"
-          placeholder=""
-          v-model="email"
-          @focus="errorBFalse"
-          @keyup.enter.native="signIn"
-        />
-        <emailSVG class="icon" />
-      </div>
-      <div class="input">
-        <input
-          type="password"
-          placeholder=""
-          v-model="password"
-          @keyup.enter.native="signIn"
-          @focus="errorBFalse"
-        />
-        <passwordSVG class="icon" />
+      <div class="input-lines">
+        <div class="input">
+          <input
+            ref="emailRef"
+            type="text"
+            placeholder=""
+            v-model="email"
+            @focus="errorBFalse"
+            @keyup.enter.native="signIn"
+          />
+          <emailSVG class="icon" v-if="writtenEmail" />
+        </div>
+        <div class="input">
+          <input
+            ref="passwordRef"
+            type="password"
+            v-model="password"
+            @keyup.enter.native="signIn"
+            @focus="errorBFalse"
+          />
+          <passwordSVG class="icon" v-if="writtenPw" />
+        </div>
       </div>
       <div class="buttons" v-click-away="errorBFalse">
         <RouterLink to="">
@@ -88,121 +116,133 @@ const signIn = () => {
 @media (min-width: 1024px) {
   .form-wrap {
     position: relative;
-    left: 0;
+    top: 70px;
     margin: auto;
-    height: 100vh;
+    height: calc(100vh - 70px);
     width: 50%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    align-content: center;
     gap: 50px;
     overflow: hidden;
+    padding: 50px;
 
     img {
       width: 200px;
     }
-
     .inputs {
       background-color: var(--color-nav-bg);
       border-radius: 10px;
       box-shadow: 2px 2px 5px 5px rgba(255, 255, 255, 0.1);
-      width: 50%;
-      height: 300px;
+      width: 65%;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      align-items: center;
       gap: 25px;
+      padding: 30px;
 
-      .input {
+      .input-lines {
         position: relative;
-        border-color: var(--vt-c-nav-text-bg-hover);
-        border-width: 2px;
-        border-radius: 5px;
-        transition: width 0.1s ease-in-out;
+        width: 100%;
         display: flex;
+        flex-direction: column;
+        gap: 30px;
 
-        .icon {
-          position: absolute;
-          bottom: 0;
-          height: 30px;
-          width: auto;
-          fill: var(--color-nav-txt);
-          z-index: 0;
-          left: 15px;
-          pointer-events: none;
-          transition: all 0.2s ease-in-out;
-          bottom: 3px;
+        .input {
+          position: relative;
+          border-color: var(--vt-c-nav-text-bg-hover);
+          transition: width 0.1s ease-in-out;
+
+          input[type="text"],
+          input[type="password"] {
+            font-size: 2rem;
+            padding: 5px 5px 5px 15px;
+            width: 100%;
+            height: 90px;
+            outline-style: solid;
+            font-family: Chango;
+            background: transparent;
+            border: var(--color-nav-txt) solid 3px;
+            border-radius: 10px;
+            outline: none;
+            transition: border 0.1s ease-in-out, width 0.1s ease-in;
+            caret-color: var(--color-nav-txt);
+          }
+          .icon {
+            position: absolute;
+            bottom: 0;
+            top: 0;
+            margin: auto;
+            height: 65%;
+            width: auto;
+            fill: var(--color-nav-txt);
+            z-index: 0;
+            left: 15px;
+            pointer-events: none;
+            transition: all 0.05s ease-in-out;
+            bottom: 3px;
+            border-radius: 5px;
+            background-color: var(--color-nav-bg);
+          }
+
+          input:focus + .icon {
+            top: -90px;
+            height: 30px;
+          }
+        }
+        input[type="text"] {
+          font-size: 2rem;
+        }
+        input,
+        select,
+        textarea {
+          color: var(--color-nav-txt);
         }
 
-        input {
-          padding: 0 0 0 10px;
-          width: 100%;
-          height: 35px;
-          outline-style: solid;
-          font-family: Chango;
-          background: transparent;
-          border: var(--color-nav-txt) solid 3px;
-          border-radius: 10px;
+        input::placeholder {
+          color: var(--color-nav-txt);
+          font-weight: Light;
+        }
+        input:focus::placeholder {
           outline: none;
-          transition: border 0.1s ease-in-out, width 0.1s ease-in;
-          caret-color: var(--color-nav-txt);
-        }
-        input:active {
-          width: 100%;
-          border-bottom: solid rgba(0, 70, 88, 0.192);
-        }
-        input:focus {
-          border: transparent solid 10px;
-          border-bottom: solid rgba(0, 70, 88, 0.192);
-          width: 100%;
-        }
-        input:focus + .icon {
-          opacity: 0;
-          left:30px;
+          color: transparent;
         }
       }
-      input,
-      select,
-      textarea {
-        color: var(--color-nav-txt);
-      }
-
-      input::placeholder {
-        color: var(--color-nav-txt);
-        font-weight: Light;
-      }
-      input:focus::placeholder {
-        outline: none;
-        color: transparent;
-      }
-
       .buttons {
         display: flex;
         align-items: center;
         flex-direction: column;
+        height: 100%;
         width: 100%;
-        gap: 25px;
+        position: relative;
+        list-style-type: none;
+        gap: 10px;
 
         a {
-          width: 50%;
-        }
-        input[type="button"] {
-          overflow: visible;
-          padding: 0 0;
           width: 100%;
-          font-family: Chango;
-          font-size: 16px;
-          border-radius: 18px;
-          cursor: pointer;
-          height: 40px;
-          color: var(--color-nav-txt) !important;
-          border-style: none;
-          box-shadow: 2px 2px 5px 1px rgba(0, 0, 0, 0.3);
-          background-color: var(--color-nav-bg);
-          transition: all 0.1s ease-in-out;
+          display: flex;
+          list-style: none;
+          text-decoration: none;
+
+          input[type="button"] {
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+            display: flex;
+            overflow: visible;
+            width: 100%;
+            height: 100%;
+            font-family: Chango;
+            font-size: 2rem;
+            border-radius: 18px;
+            cursor: pointer;
+            color: var(--color-nav-txt) !important;
+            border-style: none;
+            box-shadow: 2px 2px 5px 1px rgba(0, 0, 0, 0.3);
+            background-color: var(--color-nav-bg);
+            transition: all 0.1s ease-in-out;
+          }
         }
 
         input[type="button"]:hover {

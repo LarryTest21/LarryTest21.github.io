@@ -32,32 +32,38 @@ const intervalID = ref() as any;
 const blogPostsRefreshed = ref(false);
 const transitionList = ref() as any;
 
-const showNews = ref(false);
-const showBlog = ref(false);
-
-watch(showNews, () => {
-  console.log(showNews.value);
-  if (showNews) {
-    postKind.value = "news";
-  } else {
-    postKind.value = "blogposts";
-  }
-});
+const showPosts = ref();
 
 const showNewsButton = () => {
   clearInterval(intervalID.value);
 
   intervalID.value = setInterval(refreshNewsPostRequest, 2000);
-  showNews.value = true;
-  showBlog.value = false;
+  showPosts.value = "news";
 };
+
+watch(showPosts, () => {
+  if (showPosts.value === "blog") {
+    $(".news-btn").css("background-color", "var(--color-nav-bg)");
+    $(".news-btn").css("color", "var(--color-nav-txt)");
+
+    $(".blog-btn").css("background-color", "var(--color-nav-txt)");
+    $(".blog-btn").css("color", "var(--color-nav-bg)");
+  } else if (showPosts.value === "news") {
+    $(".news-btn").css("background-color", "var(--color-nav-txt)");
+    $(".news-btn").css("color", "var(--color-nav-bg)");
+
+    $(".blog-btn").css("background-color", "var(--color-nav-bg)");
+    $(".blog-btn").css("color", "var(--color-nav-txt)");
+  }
+});
+
+showPosts.value = "blog";
 
 const showBlogButton = () => {
   clearInterval(intervalID.value);
 
   intervalID.value = setInterval(refreshBlogPostRequest, 2000);
-  showNews.value = false;
-  showBlog.value = true;
+  showPosts.value = "blog";
 };
 
 const deletePost = async (postID, post) => {
@@ -91,7 +97,7 @@ const initialNewsPostRequest = async () => {
     });
 };
 
-const initialBlogPostRequest =async ()  => {
+const initialBlogPostRequest = async () => {
   blogPostsRefreshed.value = true;
 
   await blogRef
@@ -111,7 +117,7 @@ const initialBlogPostRequest =async ()  => {
 };
 const refreshNewsPostRequest = () => {
   transitionList.value = "fadePosts";
-  console.log("posts refreshing");
+  console.log("refreshNewsPostRequest refreshing");
 
   newsRef
     .get()
@@ -138,7 +144,6 @@ const refreshNewsPostRequest = () => {
     )
     .then(() => {
       if (newsDifferencePosts.value !== undefined) {
-
         if (newsDifferencePosts.value.length !== 0) {
           newsPostsRefreshArray.value = [];
           showBlogPostsRefresh.value = false;
@@ -151,7 +156,7 @@ const refreshNewsPostRequest = () => {
 
 const refreshBlogPostRequest = () => {
   transitionList.value = "fadePosts";
-  console.log("posts refreshing");
+  console.log("refreshBlogPostRequest refreshing");
   blogRef
     .get()
     .then((querySnapshot) =>
@@ -192,6 +197,29 @@ firebase.auth().onAuthStateChanged((user) => {
   }
 });
 
+function onBeforeEnter(el) {
+  el.style.opacity = 0;
+  el.style.height = 0;
+}
+
+function onEnter(el, done) {
+  gsap.to(el, {
+    opacity: 1,
+    height: "1.6em",
+    delay: el.dataset.index * 0.15,
+    onComplete: done,
+  });
+}
+
+function onLeave(el, done) {
+  gsap.to(el, {
+    opacity: 0,
+    height: 0,
+    delay: el.dataset.index * 0.15,
+    onComplete: done,
+  });
+}
+
 onMounted(() => {
   initialBlogPostRequest();
   initialNewsPostRequest();
@@ -200,15 +228,28 @@ onMounted(() => {
 onUnmounted(() => {
   clearInterval(intervalID.value);
 });
+const docState = ref("saved");
 </script>
 
 <template>
-  <div class="editposts-wrapper">
+  <div class="editposts-outer">
     <div class="edit-posts-inner">
       <div class="buttons">
+        <div class="btn-container"></div>
+
         <div class="news-blog">
-          <input type="button" @click="showNewsButton" value="News" />
-          <input type="button" @click="showBlogButton" value="Blog" />
+          <input
+            class="news-btn"
+            type="button"
+            @click="showNewsButton"
+            value="News"
+          />
+          <input
+            class="blog-btn"
+            type="button"
+            @click="showBlogButton"
+            value="Blog"
+          />
         </div>
         <div class="newpost-wrapper">
           <input
@@ -221,129 +262,131 @@ onUnmounted(() => {
       </div>
 
       <div class="posts-wrapper">
-        <TransitionGroup name="fade">
-          <div
-            class="blog posts-card"
-            v-for="(post, value, index) in blogPosts"
-            :key="value"
-            v-show="blogPostsRefreshed && showBlog"
-          >
-            <div class="posts" :key="value">
-              <div class="cover-image" :key="value">
-                <img :src="post.coverImage || Logo" alt="" :key="value" />
-              </div>
-              <div class="blogposts-meta" :key="value">
-                <p class="postTitle" :key="value">{{ post.postTitle }}</p>
-                <p class="postUploadTime" :key="value">
-                  Post Uploaded First:
-                  {{
-                    moment(new Date(+post.postID)).format(
-                      "MM/DD, YYYY, HH:mm:ss"
-                    )
-                  }}
-                </p>
+        <Transition name="slide-up" mode="out-in">
+          <div class="transition-wrapper" key="1" v-if="showPosts === 'blog'">
+            <div
+              class="blog posts-card"
+              v-for="(post, value) in blogPosts"
+              :key="value"
+            >
+              <div class="posts">
+                <div class="cover-image">
+                  <img :src="post.coverImage || Logo" alt="" />
+                </div>
+                <div class="blogposts-meta">
+                  <p class="postTitle">{{ post.postTitle }}</p>
+                  <p class="postUploadTime">
+                    <p>Post Uploaded First:</p>
+                    <p class="time">{{
+                      moment(new Date(+post.postID)).format(
+                        "MM/DD, YYYY, HH:mm:ss"
+                      )
+                    }}</p>
+                    
+                  </p>
 
-                <p class="postLastUpload" :key="value">
-                  Post Last Updated
-                  {{
-                    moment(new Date(post.lastUpload.toDate())).format(
-                      "MM/DD, YYYY, HH:mm:ss"
-                    )
-                  }}
-                </p>
-                <p class="postUploadTime" :key="value">
-                  Post Release Date:
-                  {{
-                    moment(new Date(post.postDate.toDate())).format(
-                      "MM/DD, YYYY, HH:mm:ss"
-                    )
-                  }}
-                </p>
-                <p class="postAuthor" :key="value">{{ post.postAuthor }}</p>
+                  <p class="postLastUpload">
+                    <p>Post Last Updated</p>
+                    <p class="time">{{
+                      moment(new Date(post.lastUpload.toDate())).format(
+                        "MM/DD, YYYY, HH:mm:ss"
+                      )
+                    }}</p>
+                    
+                  </p>
+                  <p class="postUploadTime">
+                    <p>Post Release Date:</p> <p class="time"> {{
+                      moment(new Date(post.postDate.toDate())).format(
+                        "MM/DD, YYYY, HH:mm:ss"
+                      )
+                    }}</p>
+                    
+                   
+                  </p>
+                  <p class="postAuthor">Author: {{ post.postAuthor }}</p>
+                </div>
               </div>
-            </div>
-            <div class="functions" :key="value">
-              <input
-                :key="value"
-                class="edit"
-                type="button"
-                name="edit"
-                value="Edit"
-                @click="$router.push('/createpost/' + post.postID)"
-              />
-              <input
-                :key="value"
-                class="delete"
-                type="button"
-                name="delete"
-                value="Delete"
-                @click="deletePost(post, value)"
-              />
+              <div class="functions">
+                <input
+                  class="edit"
+                  type="button"
+                  name="edit"
+                  value="Edit"
+                  @click="$router.push('/createpost/' + post.postID)"
+                />
+                <input
+                  class="delete"
+                  type="button"
+                  name="delete"
+                  value="Delete"
+                  @click="deletePost(post, value)"
+                />
+              </div>
             </div>
           </div>
-        </TransitionGroup>
-        <TransitionGroup name="fade">
           <div
-            class="news posts-card"
-            v-for="(post, value) in newsPosts"
-            :key="value"
-            v-show="newsPostsRefreshed && showNews"
+            class="transition-wrapper"
+            key="2"
+            v-else-if="showPosts === 'news'"
           >
-            <div class="posts" :key="value">
-              <div class="cover-image" :key="value">
-                <img :src="post.coverImage || Logo" alt="" :key="value" />
-              </div>
-              <div class="blogposts-meta" :key="value">
-                <p class="postTitle" :key="value">{{ post.postTitle }}</p>
-                <p class="postUploadTime" :key="value">
-                  Post Uploaded First:
-                  {{
-                    moment(new Date(+post.postID)).format(
-                      "MM/DD, YYYY, HH:mm:ss"
-                    )
-                  }}
-                </p>
+            <div
+              class="news posts-card"
+              v-for="(post2, value2) in newsPosts"
+              :key="value2"
+            >
+              <div class="posts">
+                <div class="cover-image">
+                  <img :src="post2.coverImage || Logo" alt="" />
+                </div>
+                <div class="blogposts-meta">
+                  <p class="postTitle">{{ post2.postTitle }}</p>
+                  <p class="postUploadTime">
+                    <p>Post Uploaded First:</p>
+                    <p class="time">{{
+                      moment(new Date(+post2.postID)).format(
+                        "MM/DD, YYYY, HH:mm:ss"
+                      ) }}</p>
+                  </p>
 
-                <p class="postLastUpload" :key="value">
-                  Post Last Updated
-                  {{
-                    moment(new Date(post.lastUpload.toDate())).format(
-                      "MM/DD, YYYY, HH:mm:ss"
-                    )
-                  }}
-                </p>
-                <p class="postUploadTime" :key="value">
-                  Post Release Date:
-                  {{
-                    moment(new Date(post.postDate.toDate())).format(
-                      "MM/DD, YYYY, HH:mm:ss"
-                    )
-                  }}
-                </p>
-                <p class="postAuthor" :key="value">{{ post.postAuthor }}</p>
+                  <p class="postLastUpload">
+                    <p>Post Last Updated</p>
+                    <p class="time">{{
+                      moment(new Date(post2.lastUpload.toDate())).format(
+                        "MM/DD, YYYY, HH:mm:ss"
+                      )
+                    }}</p>                 
+                  </p>
+                  <p class="postUploadTime">
+                    <p>Post Release Date:</p> 
+                  <p>{{
+                      moment(new Date(post2.postDate.toDate())).format(
+                        "MM/DD, YYYY, HH:mm:ss"
+                      )
+                    }}</p>                
+                  </p>
+                  <p class="postAuthor">Author: {{ post2.postAuthor }}</p>
+                </div>
               </div>
-            </div>
 
-            <div class="functions" :key="value">
-              <input
-                :key="value"
-                class="edit"
-                type="button"
-                name="edit"
-                value="Edit"
-                @click="$router.push('/createpost/' + post.postID)"
-              />
-              <input
-                class="delete"
-                type="button"
-                name="delete"
-                value="Delete"
-                @click="deletePost(post, value)"
-                :key="value"
-              />
+              <div class="functions">
+                <input
+                  class="edit"
+                  type="button"
+                  name="edit"
+                  value="Edit"
+                  @click="$router.push('/createpost/' + post2.postID)"
+                />
+                <input
+                  class="delete"
+                  type="button"
+                  name="delete"
+                  value="Delete"
+                  @click="deletePost(post2, value2)"
+                />
+              </div>
             </div>
           </div>
-        </TransitionGroup>
+        </Transition>
       </div>
     </div>
   </div>
@@ -353,7 +396,7 @@ onUnmounted(() => {
 input[type="button"] {
   position: relative;
   font-family: Chango;
-  font-size: 1.5rem;
+  font-size: 2rem;
   border-radius: 18px;
   cursor: pointer;
   padding: 10px;
@@ -370,17 +413,17 @@ input[type="button"]:hover {
 input[type="button"]:active {
   box-shadow: -1px -1px 1px 0.5px rgba(0, 0, 0, 0.3);
 }
-.editposts-wrapper {
+.editposts-outer {
   position: relative;
   min-height: 100vh;
   width: 100%;
   font-family: Roboto Condensed;
   font-size: 1rem;
+  padding-top:70px;
   .edit-posts-inner {
     position: relative;
     left: 0;
     right: 0;
-    top: 70px;
     margin: auto;
     padding: 30px;
     width: 70%;
@@ -416,9 +459,18 @@ input[type="button"]:active {
       width: 70%;
       display: flex;
       flex-direction: column;
+      align-items: center;
       padding: 30px;
       gap: 30px;
-
+      .transition-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+      }
       .posts-card {
         position: relative;
         display: flex;
@@ -463,8 +515,10 @@ input[type="button"]:active {
 
             .postTitle {
               transition: opacity 0.5s linear;
-
               font-size: 1.5rem;
+            }
+            .time {
+              font-style: italic;
             }
           }
         }
@@ -477,16 +531,14 @@ input[type="button"]:active {
           align-items: center;
           vertical-align: center;
           gap: 30px;
-
+          input[type="button"] {
+            font-size: 1.2rem;
+          }
           .delete {
-            transition: opacity 0.5s linear;
-
             background-color: red !important;
             color: var(--color-nav-bg) !important;
           }
           .delete:hover {
-            transition: opacity 0.5s linear;
-
             background-color: rgb(122, 2, 2) !important;
             color: var(--color-nav-bg) !important;
           }
@@ -496,13 +548,18 @@ input[type="button"]:active {
   }
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.8s;
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all 0.25s ease-out;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.slide-up-enter-from {
   opacity: 0;
+  transform: translateX(30px);
+}
+
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateX(-30px);
 }
 </style>

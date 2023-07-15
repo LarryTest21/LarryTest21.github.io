@@ -1,10 +1,48 @@
+<script setup lang="ts">
+import { ref, watch } from "vue";
+
+const props = defineProps({
+  loading: Boolean,
+  background: Boolean,
+});
+
+const loadingRef = ref();
+const wrapper = ref()
+
+
+watch(
+  () => props.loading,
+  () => {
+    
+    console.log(props.loading)
+    loadingRef.value = props.loading
+
+  }
+);
+
+watch(
+  () => props.background,
+  () => {
+    console.log(props.background)
+if (props.background === true) {
+wrapper.value.classList.add("background-on")
+} if (props.background === false)
+wrapper.value.classList.remove("background-on")
+
+  }
+);
+</script>
+
 <template>
-  <div class="posts-loading">
-    <div class="spinner"></div>
+  <div class="posts-loading" ref="wrapper">
+    <div class="spinner" v-if="loadingRef"></div>
   </div>
 </template>
 
 <style scoped lang="scss">
+.posts-loading.background-on {
+  background-color: black;
+}
 .posts-loading {
   position: absolute;
   width: 100%;
@@ -12,10 +50,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 99;
+  z-index: 102;
   transition: opacity 1s ease-in-out;
-  background-color: black;
-  opacity: 0.5;
+  opacity: 0.9;
 
   /* spinner style */
   .spinner {

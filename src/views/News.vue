@@ -7,7 +7,7 @@ import "firebase/compat/auth";
 import db from "../firebase/firebaseInit";
 import SonarLoading from "@/components/SonarLoading.vue";
 
-const isLoading = ref(false);
+const isLoading = ref(true);
 const errorCaught = ref(false);
 const colRef = firebase.firestore().collection("news");
 const newsPosts = ref([]) as any;
@@ -31,7 +31,6 @@ async function getPosts() {
     });
 }
 onMounted(async () => {
-  isLoading.value = true;
   getPosts();
 });
 </script>
@@ -222,7 +221,6 @@ onMounted(async () => {
     transition: opacity 0.2s ease-in;
   }
 
-  .fadeLoading-enter-from,
   .fadeLoading-leave-to {
     opacity: 0;
   }

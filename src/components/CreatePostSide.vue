@@ -48,23 +48,9 @@ const savedPostID = ref(false);
 
 watch(
   () => props.postID,
-  (newValue) => {
+  () => {
     postID.value = props.postID;
     savedPostID.value = true;
-  }
-);
-
-watch(
-  () => props.postSection,
-  (newValue) => {
-    console.log(newValue);
-  }
-);
-
-watch(
-  () => props.postCategory,
-  (newValue) => {
-    console.log(newValue);
   }
 );
 
@@ -98,7 +84,6 @@ watch(propRawImg, (newValue) => {
   } else {
     rawImg.value = null;
   }
-  console.log(rawImg.value);
 });
 
 const datePicker = ref();
@@ -323,7 +308,6 @@ const savePost = () => {
 };
 
 const uploadPost = async () => {
-  console.log(postTitle.value);
 
   if (postTitle.value == undefined || postTitle.value == "") {
     error.value = true;

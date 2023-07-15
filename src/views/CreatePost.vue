@@ -177,7 +177,6 @@ onMounted(() => {
     var el = document.querySelector(".ql-editor");
     if (Math.abs(el!.scrollHeight - el!.scrollTop - el!.clientHeight) < 5) {
       doOnce.value = false;
-      console.log("at the bottom");
     } else {
       doOnce.value = true;
     }

@@ -13,6 +13,10 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import Englishflag from "@/assets/logos/English_language.svg";
 import Hungaryflag from "@/assets/logos/Hungary_Flag.svg";
+import { isAdmin } from "@/store/isAdmin";
+
+const isAdminCheck = isAdmin();
+
 
 const langEn = ref(false) as any;
 const langHu = ref(false) as any;
@@ -56,6 +60,8 @@ const displayName = ref();
 const userClick = userClicked();
 
 const initialName = ref();
+
+const userClearance = ref();
 
 const loggedIn = ref();
 loggedIn.value = localStorage.getItem("isLoggedIn");
@@ -168,22 +174,21 @@ timeCurrent();
 //WEATHER SCRIPT
 var getIP = "https://geolocation-db.com/json/";
 var openWeatherMap = "https://api.openweathermap.org/data/2.5/weather/";
-const location2 = ref()
+const location2 = ref();
 
-const city = ref()
-const temp = ref()
-
+const city = ref();
+const temp = ref();
 
 const getWeather2 = () => {
-    $.getJSON(getIP).done(function (location) {
+  $.getJSON(getIP).done(function (location) {
     $.getJSON(openWeatherMap, {
       lat: location.latitude,
       lon: location.longitude,
       units: "metric",
       APPID: "20fd3e315880d30f3beed6621ed06ee1",
     }).done(function (weather) {
-      city.value = location.city
-      temp.value = Math.round(weather.main.temp)
+      city.value = location.city;
+      temp.value = Math.round(weather.main.temp);
     });
   });
 };
@@ -240,12 +245,15 @@ onMounted(() => {
 
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
+
+
+      //Check if User logged in
       if (firebase.auth().currentUser?.uid != undefined) {
         signedInCheck.state = true;
         loginActivated.value = true;
         activateLoginTab.value = false;
       }
-
+      //Creating initials
       var getInitials = function (name) {
         var parts = name.split(" ");
         var initials = "";
@@ -353,6 +361,7 @@ onMounted(() => {
             ref="UserTabHeight"
             v-if="signedInCheck.state && userClick.state"
             v-click-away="closeProfileTab"
+            :isAdminCheck="isAdminCheck.state"
           />
         </transition>
       </nav>

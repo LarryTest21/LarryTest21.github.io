@@ -4,7 +4,7 @@ import "jquery";
 import $ from "jquery";
 import { onMountApp } from "@/store/onMountApp";
 import { ref, watch } from "vue";
-import { postLoaded } from "@/store/postLoaded";
+import { isAdmin } from "@/store/isAdmin";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,12 +38,22 @@ const router = createRouter({
     {
       path: "/EditPostsList",
       name: "editpostslist",
-      beforeEnter: guardRoute,
+      beforeEnter: guardRouteUser,
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () =>
         import(/* webpackChunkName: "News" */ "@/views/EditPostsList.vue"),
+    },
+    {
+      path: "/AdminPage",
+      name: "adminpage",
+      beforeEnter: guardRouteAdmin,
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () =>
+        import(/* webpackChunkName: "News" */ "@/views/AdminPage.vue"),
     },
     {
       path: "/CreatePost/:createSlug",
@@ -57,7 +67,7 @@ const router = createRouter({
     {
       path: "/Profile",
       name: "profile",
-      beforeEnter: guardRoute,
+      beforeEnter: guardRouteUser,
 
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
@@ -184,7 +194,7 @@ router.beforeEach((to, from, next) => {
   else next();
 });
 
-function guardRoute(to, from, next) {
+function guardRouteUser(to, from, next) {
   var isAuthenticated = JSON.parse(
     localStorage.getItem("isLoggedIn") as string
   );
@@ -194,6 +204,19 @@ function guardRoute(to, from, next) {
   } else {
     next("/login"); // go to '/login';
   }
+}
+function guardRouteAdmin(to, from, next) {
+  console.log("admincheck");
+  const isAdminCheck =  isAdmin();
+  console.log(isAdminCheck.state);
+
+  setTimeout(() => {
+    if (isAdminCheck.state) {
+      next(); // allow to enter route
+    } else {
+      next("/"); // go to '/login';
+    }
+  }, 300);
 }
 
 export default router;

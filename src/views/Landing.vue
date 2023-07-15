@@ -232,7 +232,6 @@ onMounted(() => {
     $(".dots-list > a > li > div").removeClass("dot-active");
 
     const href = event.currentTarget.getAttribute("href") as any;
-    console.log(href)
     event.currentTarget.querySelector(".dot")?.classList.add("dot-active");
     $(".dots-list > a > li > div").removeClass("active");
     $(".dots-list > a > li > div").removeClass("up");
@@ -495,13 +494,12 @@ onUnmounted(() => {
           }
         }
         .image-carousel.active {
-          z-index: 2;
           box-shadow: 10px 10px 10px 15px rgba(black, 0.3);
           transform: translateX(0);
           opacity: 1;
         }
         .image-carousel.active:hover > img {
-          scale: 1.5;
+          scale: 1.1;
         }
       }
     }

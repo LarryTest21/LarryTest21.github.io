@@ -11,14 +11,54 @@ import { useRoute } from "vue-router";
 import "firebase/compat/auth";
 import { mobileIconClicked } from "@/store/mobileIconClicked";
 import { onMountApp } from "@/store/onMountApp";
+import { isAdmin } from "@/store/isAdmin";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import db from "@/firebase/firebaseInit";
 
 const mobileNav = ref();
 const mobileNavButton = ref(false);
 const showNav = ref(false);
 var windowWidth = document.documentElement.clientWidth;
 
+const isAdminCheck = isAdmin();
+
+firebase.auth().onAuthStateChanged((user) => {
+  //Getting User clearent - admin or regular user
+
+  if (user) {
+    const { adminTrue } = isAdminCheck;
+    const { adminFalse } = isAdminCheck;
+    console.log(isAdminCheck.state);
+
+    adminFalse();
+    if (isAdminCheck.state === "regular") {
+      console.log("check clearance");
+      const dataBase = db
+        .collection("users")
+        .doc(firebase.auth().currentUser?.uid);
+      dataBase.get().then((doc) => {
+        var userData = doc.data();
+
+        if (userData!.clearance === "admin") {
+          adminTrue();
+        }
+      });
+    }
+  }
+});
+
 const scrollIndicator = ref();
 const mobileNavIconClicked = mobileIconClicked();
+
+const navigation = ref(false);
+const currentTheme = useTheme();
+
+const route = useRoute();
+
+const isLoading = useLoaderState();
+const mountApp = onMountApp();
+mountApp.state = false;
 
 const onResize = () => {
   windowWidth = document.documentElement.clientWidth;
@@ -34,29 +74,25 @@ const onResize = () => {
     mobileNavButton.value = false;
   }
 };
-onResize();
 
 window.addEventListener("resize", onResize);
-
-const route = useRoute();
-
-const navigation = ref(false);
-const currentTheme = useTheme();
-
-
-const isLoading = useLoaderState();
-const mountApp = onMountApp();
-mountApp.state = false;
 
 const checkRoute = () => {
   navigation.value = true;
 };
+
 watch(
   () => route.name,
   () => {
     checkRoute();
+    if (route.name === "post" || route.name === "newspost") {
+      window.addEventListener("scroll", moveScrollIndicator);
+    } else {
+      window.removeEventListener("scroll", moveScrollIndicator);
+    }
   }
 );
+
 function moveScrollIndicator(e) {
   const maxHeight = document.body.scrollHeight - window.innerHeight;
   const scrollIndicator = document.getElementById("scrollIndicator");
@@ -70,12 +106,11 @@ function moveScrollIndicator(e) {
 }
 
 onMounted(() => {
-  window.addEventListener("scroll", moveScrollIndicator);
-
   mountApp.state = true;
   setTimeout(() => {
     showNav.value = true;
   }, 100);
+  onResize();
 });
 </script>
 

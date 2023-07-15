@@ -79,7 +79,6 @@ const modalButton = modalButtonActive();
   justify-content: center;
   align-items: center;
   z-index: -1;
-
 }
 .modal {
   width: 100%;
@@ -93,10 +92,10 @@ const modalButton = modalButtonActive();
   display: flex;
   flex-direction: column;
   z-index: 70;
-  left:0;
+  left: 0;
   font-size: 3rem;
   border-radius: 30px;
-  padding:30px;
+  padding: 30px;
   .modal-message {
     position: relative;
     height: 100%;
@@ -128,12 +127,13 @@ const modalButton = modalButtonActive();
   }
 
   .loader {
+    scale: v-bind(loadingScale);
     width: 48px;
     height: 48px;
     border-width: 3px;
     border-style: dashed solid solid dotted;
-    border-color: var(--color-nav-txt) var(--color-nav-txt) transparent
-      var(--color-nav-txt);
+    border-color: var(--color-nav-bg) var(--color-nav-bg) transparent
+      var(--color-nav-bg);
     border-radius: 50%;
     display: inline-block;
     position: relative;
@@ -147,7 +147,7 @@ const modalButton = modalButtonActive();
     left: 20px;
     top: 31px;
     border: 10px solid transparent;
-    border-right-color: var(--color-nav-txt);
+    border-right-color: var(--color-nav-bg);
     transform: rotate(-40deg);
   }
 

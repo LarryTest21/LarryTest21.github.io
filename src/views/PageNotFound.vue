@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
+import router from "../router";
+
+const toHome = () => {
+  router.push({ name: "landing" });
+};
 </script>
 <template>
   <div class="wrapper">
@@ -11,8 +16,8 @@ import "@vuepic/vue-datepicker/dist/main.css";
       <div class="animation-wrapper">
         <h1>404</h1>
       </div>
-      <div class="back-wrapper">
-        <RouterLink to="/"><li>Go back</li></RouterLink>
+      <div class="back-wrapper"  @click="toHome">
+        Go back
         <div class="arrow">
           <span></span>
           <span></span>
@@ -23,7 +28,7 @@ import "@vuepic/vue-datepicker/dist/main.css";
   </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @media (min-width: 1024px) {
   .wrapper {
     position: relative;
@@ -47,17 +52,20 @@ import "@vuepic/vue-datepicker/dist/main.css";
         justify-content: center;
       }
       .animation-wrapper {
+        position: relative;
+
         display: flex;
         justify-content: center;
       }
       .back-wrapper {
-        margin-top: 100px;
+        cursor: pointer;
         position: relative;
+        position: relative;
+        margin-top:100px;
         display: flex;
         justify-content: center;
         flex-direction: column;
         align-items: center;
-        width: 400px;
         a {
           position: relative;
           text-decoration: none;
@@ -72,6 +80,8 @@ import "@vuepic/vue-datepicker/dist/main.css";
 
         .arrow {
           position: relative;
+          cursor: pointer;
+          height: 100%;
           transform: rotate(-90deg);
           left: -20px;
         }
