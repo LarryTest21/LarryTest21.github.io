@@ -58,10 +58,12 @@ const register = async () => {
     const dataBase = db.collection("users").doc(result.user!.uid);
 
     await dataBase.set({
+      createdAt: new Date(),
       firstName: firstName.value,
       lastName: lastName.value,
       username: user.value,
       email: email.value,
+      clearance: 'regular'
     });
 
     const getInitials = function (name) {

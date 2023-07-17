@@ -28,6 +28,8 @@
     "vue": "^3.2.45",
     "vue-axios": "^3.5.2",
     "vue-cropperjs": "^5.0.0",
+    "vue-gtag": "^2.0.1",
+    "vue-gtag-next": "^1.14.0",
     "vue-lodash": "^2.1.2",
     "vue-multiselect": "^3.0.0-beta.2",
     "vue-router": "^4.1.6",

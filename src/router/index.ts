@@ -5,6 +5,8 @@ import $ from "jquery";
 import { onMountApp } from "@/store/onMountApp";
 import { ref, watch } from "vue";
 import { isAdmin } from "@/store/isAdmin";
+import { trackRouter } from "vue-gtag-next";
+import { settings } from "firebase/analytics";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -152,6 +154,10 @@ const router = createRouter({
   ],
 });
 
+
+
+trackRouter(router);
+
 router.beforeEach((to, from, next) => {
   const isLoading = useLoaderState();
   const { changeStateTrue } = isLoading;
@@ -190,7 +196,13 @@ router.beforeEach((to, from, next) => {
     (to.name == "editpostslist" && !isAuthenticated) ||
     (to.name == "createpost" && !isAuthenticated)
   )
-    next({ name: "login" });
+    next({ name: "login" })
+
+    else if(to.name == "adminpage") {
+      setTimeout(() => {
+        next()
+      }, 500);
+    }
   else next();
 });
 
@@ -206,9 +218,7 @@ function guardRouteUser(to, from, next) {
   }
 }
 function guardRouteAdmin(to, from, next) {
-  console.log("admincheck");
   const isAdminCheck =  isAdmin();
-  console.log(isAdminCheck.state);
 
   setTimeout(() => {
     if (isAdminCheck.state) {

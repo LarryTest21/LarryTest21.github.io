@@ -272,6 +272,7 @@ const saveProfile = async () => {
                 userName: showUserName.value,
                 firstName: showFirstName.value,
                 lastName: showLastName.value,
+                lastUpload: new Date(),
               })
               .catch((error) => {
                 error.value = true;
@@ -360,10 +361,12 @@ onMounted(() => {});
         <Modal
           class="modal"
           v-if="modalActivation"
+          :position="'absolute'"
           :modalAnimation="modalAnimation"
           :loadingScale="2"
           :modalLoadingMessage="modalLoadingMessage"
           :modalButtonMessage="modalButtonMessage"
+          :spinnerColor="'var(--color-nav-txt)'"
           v-click-away="modalClickAwayFunction"
         />
       </transition>
@@ -745,6 +748,8 @@ onMounted(() => {});
     }
   }
 }
+
+
 
 .error-enter-active,
 .error-leave-active {

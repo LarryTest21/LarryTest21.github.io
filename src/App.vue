@@ -16,6 +16,8 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import db from "@/firebase/firebaseInit";
 
+
+
 const mobileNav = ref();
 const mobileNavButton = ref(false);
 const showNav = ref(false);
@@ -29,11 +31,9 @@ firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     const { adminTrue } = isAdminCheck;
     const { adminFalse } = isAdminCheck;
-    console.log(isAdminCheck.state);
 
     adminFalse();
     if (isAdminCheck.state === "regular") {
-      console.log("check clearance");
       const dataBase = db
         .collection("users")
         .doc(firebase.auth().currentUser?.uid);

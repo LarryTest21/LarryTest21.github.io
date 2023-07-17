@@ -72,10 +72,12 @@ onMounted(() => {
   <div class="login-wrap">
     <transition name="modal">
       <Modal
-        v-if="modalActivation.state"
+      v-if="modalActivation.state"
         :modalButtonShow="modalButtonShow"
         :modalButtonMessage="modalButtonMessage"
-        :modalAnimation="modalAnimation"
+        :modalAnimation="true"
+        :spinnerColor="'var(--color-nav-txt)'"
+        class="modal"
       />
     </transition>
 
@@ -113,6 +115,9 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+.modal {
+position:absolute;
+}
 .login-wrap {
   position: fixed;
   width: 250px;

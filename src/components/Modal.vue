@@ -11,6 +11,8 @@ const props = defineProps({
   modalLoadingMessage: String,
   modalButtonMessage: String,
   backgroundOpacity: Number,
+  spinnerColor: String,
+  position: String
 });
 
 const closeModal = () => {
@@ -84,7 +86,7 @@ const modalButton = modalButtonActive();
   width: 100%;
   height: 100%;
   top: 0;
-  position: absolute;
+  position: v-bind(position);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -95,7 +97,6 @@ const modalButton = modalButtonActive();
   left: 0;
   font-size: 3rem;
   border-radius: 30px;
-  padding: 30px;
   .modal-message {
     position: relative;
     height: 100%;
@@ -132,11 +133,9 @@ const modalButton = modalButtonActive();
     height: 48px;
     border-width: 3px;
     border-style: dashed solid solid dotted;
-    border-color: var(--color-nav-bg) var(--color-nav-bg) transparent
-      var(--color-nav-bg);
+    border-color:  v-bind(spinnerColor) v-bind(spinnerColor) transparent  v-bind(spinnerColor) 
+    ;
     border-radius: 50%;
-    display: inline-block;
-    position: relative;
     box-sizing: border-box;
     animation: rotation 1.5s linear infinite;
   }
@@ -147,7 +146,7 @@ const modalButton = modalButtonActive();
     left: 20px;
     top: 31px;
     border: 10px solid transparent;
-    border-right-color: var(--color-nav-bg);
+    border-right-color: v-bind(spinnerColor);
     transform: rotate(-40deg);
   }
 

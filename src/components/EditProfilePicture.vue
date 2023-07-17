@@ -18,7 +18,7 @@ const dialog = ref(false);
 const fileUpload = ref();
 const profPicState = profPicClose();
 const cropper = ref() as any;
-
+const showCropButton = ref(false)
 const uploadProgress = ref();
 
 const modalActivation = ref(false);
@@ -31,6 +31,8 @@ currentPFP.value = localStorage.getItem("avatar");
 const destination = ref();
 
 const onFileSelect = (e) => {
+  showCropButton.value= true
+
   dialog.value = true;
   const file = e.target.files[0];
   const mime_type = ref();
@@ -107,6 +109,7 @@ const handleCropped = () => {
   }
 
   roundedCanvasOutside.value = dataURLtoBlob(destination.value);
+
 };
 
 
@@ -177,12 +180,14 @@ const UploadImage = () => {
   <div class="editingPanel-wrapper">
     <transition name="modal">
       <Modal
+      class="modal"
         v-if="modalActivation"
         :modalLoadingMessage="modalLoadingMessage"
         :modalAnimation="modalAnimation"
       />
     </transition>
     <input
+    
       class="backButton"
       type="button"
       @click="closePicPanel"
@@ -210,6 +215,7 @@ const UploadImage = () => {
         v-if="selectedFile && !destination"
       ></VueCropper>
       <input
+      v-if="showCropButton"
         type="button"
         value="Crop"
         @click="handleCropped"
@@ -249,7 +255,6 @@ const UploadImage = () => {
 .editingPanel-wrapper {
   padding: 20px;
   position: absolute;
-  width: 100%;
   height: 80%;
   align-self: center;
   border-radius: 30px;
@@ -312,6 +317,7 @@ const UploadImage = () => {
     input[type="button"] {
       position: absolute;
       bottom: -60px;
+      font-size: 1.6rem;
     }
 
     .preview {
@@ -334,7 +340,9 @@ const UploadImage = () => {
     gap: 20px;
   }
 }
-
+.modal {
+  position: absolute;
+}
 .modal-enter-active,
 .modal-leave-active {
   transition: all 0.3s ease-out;
