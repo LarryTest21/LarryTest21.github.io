@@ -5,30 +5,53 @@ import {
   getCountFromServer,
   doc,
   getDoc,
+  query,
 } from "firebase/firestore";
 import db from "../firebase/firebaseInit";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import moment from "moment";
+import Users from "@/components/icons/users-multiple.vue";
+import $ from "jquery";
 
 const usersRef = collection(db, "users");
 const usersArray = ref([]) as any;
 const userCount = ref();
 
-const isLoading = ref(true);
+const isLoadingCount = ref(true);
 const createdAt = ref() as any;
 const isActive = ref();
 const item = ref([]) as any;
 const lastRegistered = ref([]) as any;
 
-const pseudoDiv = ref(false)
+const usersArray2 = ref([]) as any;
+
+const colRef = firebase.firestore().collection("users");
+
+const isAnim = ref();
+const isPseudo = ref();
+
+const usersWrap = ref();
+
+const pseudoDiv = ref(false);
+
+const emit = defineEmits(["editPressed"]);
 
 const lastRegisteredLoaded = ref(false);
-console.log(lastRegistered.value);
+
+const getUsers = () => {
+  colRef.get().then((querySnapshot) => {
+    querySnapshot.forEach((user) => {
+      var check = user.data();
+      usersArray2.value.push(check);
+      console.log(usersArray2.value);
+    });
+  });
+};
+getUsers();
 onBeforeMount(async () => {
   (async () => {
-    const colRef = firebase.firestore().collection("users");
-
+    lastRegisteredLoaded.value = false;
     colRef
       .get()
       .then((querySnapshot) =>
@@ -47,7 +70,9 @@ onBeforeMount(async () => {
               return prev;
             }
           });
-          lastRegisteredLoaded.value = true;
+          setTimeout(() => {
+            lastRegisteredLoaded.value = true;
+          }, 1000);
         })
       )
       .catch((err) => {
@@ -59,50 +84,112 @@ onBeforeMount(async () => {
   })().then((users) => {
     userCount.value = users;
     setTimeout(() => {
-      isLoading.value = false;
+      isLoadingCount.value = false;
     }, 1000);
   });
 });
 
 function editUsers() {
   isActive.value = !isActive.value;
-  pseudoDiv.value = !pseudoDiv.value
+  // pseudoDiv.value = !pseudoDiv.value;
+  // isPseudo.value = true;
+
+  // if (!pseudoDiv.value) {
+  //   isPseudo.value = false;
+  //   isAnim.value = true;
+  //   setTimeout(() => {
+  //     isAnim.value = false;
+  //   }, 300);
+  // } else {
+  // }
+
+  emit("editPressed", isActive.value);
 }
 </script>
 
 <template>
-  <div class="users-wrapper" :class="{ active: isActive }">
-    <div class="posts-tab-label">Users</div>
-    <input type="button" class="button" value="Edit" @click="editUsers" />
-    <div class="inner">
-      <div class="text-count">
-        <div class="text-count-inner">
-          <transition name="skeleton">
-            <div class="skeleton" v-if="isLoading"></div>
-          </transition>
-          <p>All users:</p>
-          <p>{{ userCount }}</p>
-        </div>
+  <div class="adminusers-container">
+    <div class="pseudo-div"></div>
+    <div class="users-wrapper" ref="usersWrap">
+      <div class="label">
+        <Users class="usersIcon" />
+        <input type="button" class="button" value="Edit" @click="editUsers" />
       </div>
-      <div class="last-registered">
-        <div class="text" v-if="lastRegisteredLoaded">
-          <transition name="skeleton" v-if="isLoading">
-            <div class="skeleton"></div>
-          </transition>
-          <label>Last Registered</label>
-          <p>
-            Full name: {{ lastRegistered.firstName }}
-            {{ lastRegistered.lastName }}
-          </p>
-          <p>
-            Registered on:
-            {{
-              moment(new Date(lastRegistered.createdAt.toDate())).format(
-                "MMM DD, YYYY - HH:mm"
-              )
-            }}
-          </p>
-          <p>Email: {{ lastRegistered.email }}</p>
+
+      <div class="inner">
+        <div class="text-count" v-if="!isActive">
+          <div class="text-count-inner">
+            <transition name="skeleton">
+              <div class="skeleton" v-if="isLoadingCount"></div>
+            </transition>
+            <p>All users:</p>
+            <p>{{ userCount }}</p>
+          </div>
+        </div>
+        <TransitionGroup name="user-list">
+          <div class="user-list-wrapper" v-if="isActive">
+            <ul class="user-list-top">
+              <li>Full Name</li>
+              <li>Rights</li>
+              <li>Email</li>
+              <li>Registered</li>
+              <li>Profile Picture</li>
+            </ul>
+            <div class="user-list" v-for="users in usersArray2">
+              <div class="user-list-container">
+                <div class="name">
+                  {{ users.firstName }} {{ users.lastName }}
+                </div>
+                <div class="rights" v-if="users.clearance === 'admin'">
+                  <div class="admin">{{ users.clearance }}</div>
+                </div>
+                <div class="rights" v-if="users.clearance === 'regular'">
+                  <div class="regular">{{ users.clearance }}</div>
+                </div>
+
+                <div class="email">{{ users.email }}</div>
+                <div
+                  class="registered-date"
+                  v-if="users.createdAt !== undefined"
+                >
+                  {{
+                    moment(new Date(users.createdAt.toDate())).format(
+                      "MMM DD, YYYY - HH:mm"
+                    )
+                  }}
+                </div>
+                <div class="placeholder" v-else>Unknown</div>
+                <div class="img-wrapper">
+                  <img v-bind:src="users.profilePic" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </TransitionGroup>
+        <div class="last-registered-wrapper" key="1">
+          <div class="last-registered">
+            <transition name="skeleton" v-if="!lastRegisteredLoaded">
+              <div class="skeleton"></div>
+            </transition>
+            <TransitionGroup name="user-list">
+              <div class="text" v-show="lastRegisteredLoaded" key="2">
+                <label>Last Registered</label>
+                <p>
+                  Full name: {{ lastRegistered.firstName }}
+                  {{ lastRegistered.lastName }}
+                </p>
+                <p v-if="lastRegistered.createdAt !== undefined">
+                  Registered on:
+                  {{
+                    moment(new Date(lastRegistered.createdAt.toDate())).format(
+                      "MMM DD, YYYY - HH:mm"
+                    )
+                  }}
+                </p>
+                <p>Email: {{ lastRegistered.email }}</p>
+              </div>
+            </TransitionGroup>
+          </div>
         </div>
       </div>
     </div>
@@ -110,21 +197,22 @@ function editUsers() {
 </template>
 
 <style lang="scss" scoped>
-.users-wrapper.active {
-  position: absolute;
-  z-index: 10;
-  width: 800px;
-  height:600px;
-  transform: translate(-50%, -50%);
-  top: 50%;
-  left: 50%;
-}
-.users-wrapper {
-  top: 0;
-  left:0;
+.adminusers-container {
   position: relative;
-  width: 400px;
+}
+
+.pseudo-div {
+  position: absolute;
+  width: 450px;
   height: 300px;
+  transition: all 0.3s ease-in-out;
+}
+
+.users-wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
   background: var(--color-nav-bg);
   color: var(--color-nav-txt);
   font-size: 1rem;
@@ -133,52 +221,57 @@ function editUsers() {
   font-family: Roboto Condensed;
   font-weight: 800;
   border-radius: 20px;
-  box-shadow: 4px 4px 2px 1px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s ease-in-out;
-
-  .posts-tab-label {
+  overflow: hidden;
+  .label {
     position: relative;
-    height: 30%;
-    font-size: 2.4rem;
+    height: 100px;
     padding: 20px;
-    background-color: rgb(4, 123, 192);
-    border-radius: 15px 15px 0 0;
     color: var(--color-nav-bg);
+    background-color: rgb(4, 123, 192);
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+
+    .usersIcon {
+      height: 100%;
+      fill: white;
+    }
+    .button {
+      position: relative;
+      right: 0;
+      top: 0;
+      height: 100%;
+      font-family: Chango;
+      font-size: 1.4rem;
+      font-weight: 400;
+      right: 0;
+      top: 0;
+      border-radius: 18px;
+      cursor: pointer;
+      padding: 10px;
+      color: var(--color-nav-txt);
+      border-style: none;
+      box-shadow: 2px 2px 5px 1px rgba(0, 0, 0, 0.3);
+      background-color: var(--color-nav-bg);
+      transition: all 0.2s ease-in-out;
+    }
+    .button:hover {
+      color: var(--color-nav-bg);
+      background-color: var(--color-nav-txt);
+    }
+    .button:active {
+      box-shadow: -1px -1px 1px 0.5px rgba(0, 0, 0, 0.3);
+    }
   }
 
-  .button {
-    position: absolute;
-    right: 0;
-    top: 0;
-    margin: 20px;
-    font-family: Chango;
-    font-size: 1.4rem;
-    font-weight: 400;
-    right: 0;
-    top: 0;
-    border-radius: 18px;
-    cursor: pointer;
-    padding: 10px;
-    color: var(--color-nav-txt);
-    border-style: none;
-    box-shadow: 2px 2px 5px 1px rgba(0, 0, 0, 0.3);
-    background-color: var(--color-nav-bg);
-    transition: all 0.2s ease-in-out;
-  }
-  .button:hover {
-    color: var(--color-nav-bg);
-    background-color: var(--color-nav-txt);
-  }
-  .button:active {
-    box-shadow: -1px -1px 1px 0.5px rgba(0, 0, 0, 0.3);
-  }
   .inner {
     position: relative;
     display: flex;
     flex-direction: column;
+    height: 100%;
     width: 100%;
     justify-content: space-between;
-    height: 100%;
     .text-count {
       position: relative;
       width: 100%;
@@ -191,15 +284,92 @@ function editUsers() {
         display: flex;
         flex-direction: row;
         gap: 10px;
-        padding: 5px 20px;
         justify-content: center;
         align-items: center;
         font-size: 2rem;
       }
     }
+
+    .user-list-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 20px;
+      font-size: 1.4rem;
+      .user-list-top {
+        text-decoration: none;
+        list-style-type: none;
+        display: flex;
+        gap: 50px;
+        padding-left: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-template-rows: 1fr;
+        gap: 0px 0px;
+        font-size: 2rem;
+      }
+      .user-list {
+        position: relative;
+        width: 100%;
+        height: 80px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        background-color: var(--color-nav-txt);
+        border-radius: 5px;
+        color: var(--color-nav-bg);
+        .user-list-container {
+          position: relative;
+          width: 100%;
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+          grid-template-rows: 1fr;
+          div {
+            display: flex;
+            align-items: center;
+          }
+          .rights {
+            width: 100px;
+
+            div {
+              padding: 10px;
+            }
+            .admin {
+              background-color: rgb(143, 140, 0);
+              border-radius: 6px;
+            }
+            .regular {
+              background-color: rgb(0, 143, 43);
+              border-radius: 6px;
+            }
+          }
+
+          .img-wrapper {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            img {
+              margin-left: 30px;
+              height: 60px;
+              display: flex;
+              justify-content: center;
+            }
+          }
+        }
+      }
+    }
+    .last-registered-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 10px;
+    }
     .last-registered {
       position: relative;
-      padding: 10px;
+      height: 100%;
       .text {
         position: relative;
         font-size: 1rem;
@@ -215,7 +385,6 @@ function editUsers() {
           font-size: 1.3rem;
           background-color: #008ca5;
           padding-left: 10px;
-
         }
         p {
           padding: 5px;
@@ -260,5 +429,19 @@ function editUsers() {
 .skeleton-enter-from,
 .skeleton-leave-to {
   opacity: 0;
+}
+
+.user-list-enter-active,
+.user-list-leave-active {
+  transition: all 0.3s ease-in-out;
+  opacity: 1;
+  height: 100%;
+}
+
+.user-list-enter-from,
+.user-list-leave-to {
+  opacity: 0;
+  height: 0;
+  transform: translateX(-200px);
 }
 </style>

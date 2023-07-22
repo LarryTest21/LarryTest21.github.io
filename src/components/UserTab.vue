@@ -80,7 +80,8 @@ const logOut = () => {
   if (
     route.name === "profile" ||
     route.name === "editposts" ||
-    route.name === "createpost"
+    route.name === "createpost" ||
+    route.name === "adminpage"
   ) {
     console.log("pushed");
     router.push({ name: "landing" });

@@ -14,22 +14,41 @@ import Modal from "@/components/Modal.vue";
 import AdminCounts from "@/components/AdminPostsCount.vue";
 import AdminUsersTab from "@/components/AdminUsersTab.vue";
 import { initializeApp } from "firebase/app";
-
-import { getAnalytics, logEvent } from "firebase/analytics";
-
+import GoogleA from "@/assets/subtest-gakey.json"
 
 
-const analytics = getAnalytics();
-console.log(analytics);
+const isActive = ref(false);
+const keepP = ref(false);
 
-logEvent(analytics, "notification_received");
+
+const editPressed = (value) => {
+  isActive.value = value;
+  console.log(isActive.value);
+
+  if (isActive.value) {
+  } else {
+    keepP.value = true;
+
+    setTimeout(() => {
+      keepP.value = false;
+    }, 500);
+  }
+};
+
+
+
 
 </script>
 
 <template>
   <div class="admin-page-wrapper">
     <div class="admin-page">
-      <AdminUsersTab class="admincard" />
+      <div class="pseudo-div" :class="{ anim: isActive, keepP: keepP }"></div>
+      <AdminUsersTab
+        @editPressed="editPressed"
+        class="admincard userstab"
+        :class="{ anim: isActive, keepP: keepP }"
+      />
       <AdminCounts class="admincard" />
       <div class="admincard anayltics-wrapper"></div>
     </div>
@@ -38,18 +57,56 @@ logEvent(analytics, "notification_received");
 
 <style lang="scss" scoped>
 .admin-page-wrapper {
-  height: 100vh;
   width: 100%;
-
+  min-height: calc(100vh - 70px);
+  padding: 30px;
   .admin-page {
     position: relative;
-    height: calc(100% - 70px);
     width: 100%;
     top: 70px;
     display: flex;
     flex-wrap: wrap;
     gap: 30px;
-    padding: 30px;
+  }
+  .pseudo-div {
+    position: absolute;
+    width: 450px;
+    height: 300px;
+    transition: all 0.3s ease-in-out;
+  }
+  .pseudo-div.anim {
+    position: relative;
+    width: 0px;
+  }
+  .pseudo-div.keepP {
+    width: 450px;
+    position: relative;
+  }
+  .admincard {
+    position: relative;
+    width: 450px;
+    height: 300px;
+    box-shadow: 4px 4px 2px 1px rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+  }
+  .userstab {
+    position: relative;
+    transition: all 0.3s ease-in-out;
+    transform: translate(0, 0);
+  }
+
+  .userstab.keepP {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+
+  }
+  .userstab.anim {
+    position: absolute;
+    width: 80%;
+    height: 600px;
+    z-index: 10;
   }
 }
 </style>

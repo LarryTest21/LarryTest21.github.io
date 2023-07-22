@@ -68,57 +68,78 @@ firebase.auth().onAuthStateChanged((user) => {
     userPFPStored.value = localStorage.getItem("avatar");
 
     const downloadPFP = () => {
-      const userStorage = firebase.auth().currentUser?.uid;
-      const storage = getStorage();
+      // const userStorage = firebase.auth().currentUser?.uid;
+      // const storage = getStorage();
 
-      const storageRef = storageFBRef(
-        storage,
-        "/" + userStorage + "/" + "avatar.png"
-      );
+      // const storageRef = storageFBRef(
+      //   storage,
+      //   "/" + userStorage + "/" + "avatar.png"
+      // );
 
-      const convertBase64 = async () => {
-        const blob = await getBlob(storageRef);
-        var reader = new FileReader();
-        reader.readAsDataURL(blob);
+      // const convertBase64 = async () => {
+      //   const blob = await getBlob(storageRef);
+      //   var reader = new FileReader();
+      //   reader.readAsDataURL(blob);
 
-        reader.onloadend = function () {
-          var base64data = reader.result;
-          userPFPStored.value = base64data;
-          userPFP.value = base64data;
+      //   reader.onloadend = function () {
+      //     var base64data = reader.result;
+      //     userPFPStored.value = base64data;
+      //     userPFP.value = base64data;
+      //     localStorage.setItem("avatar", userPFPStored.value);
+      //     return;
+      //   };
+      // };
+
+      // convertBase64()
+      //   .catch((error) => {
+      //     switch (error.code) {
+      //       case "storage/object-not-found":
+      //         toDataUrl(Logo, function (myBase64) {
+      //           console.log(myBase64); // myBase64 is the base64 string
+      //           userPFPStored.value = myBase64;
+      //           localStorage.setItem("avatar", myBase64);
+      //         });
+
+      //         break;
+      //       case "storage/unauthorized":
+      //         // User doesn't have permission to access the object
+      //         break;
+      //       case "storage/canceled":
+      //         // User canceled the upload
+      //         break;
+
+      //       // ...
+
+      //       case "storage/unknown":
+      //         // Unknown error occurred, inspect the server response
+      //         break;
+      //     }
+      //   })
+      //   .then(() => {
+      //     setTimeout(() => {
+      //       modalActivation.value = false;
+      //     }, 2000);
+      //   });
+
+      var docRef = firebase
+        .firestore()
+        .collection("users")
+        .doc(firebase.auth().currentUser!.uid);
+      docRef
+        .get()
+        .then((user) => {
+          var check = user.data();
+          console.log(check);
+
+          userPFPStored.value = check!.profilePic;
+          userPFP.value = check!.profilePic
           localStorage.setItem("avatar", userPFPStored.value);
-          return;
-        };
-      };
 
-      convertBase64()
-        .catch((error) => {
-          switch (error.code) {
-            case "storage/object-not-found":
-              toDataUrl(Logo, function (myBase64) {
-                console.log(myBase64); // myBase64 is the base64 string
-                userPFPStored.value = myBase64;
-                localStorage.setItem("avatar", myBase64);
-              });
-
-              break;
-            case "storage/unauthorized":
-              // User doesn't have permission to access the object
-              break;
-            case "storage/canceled":
-              // User canceled the upload
-              break;
-
-            // ...
-
-            case "storage/unknown":
-              // Unknown error occurred, inspect the server response
-              break;
-          }
         })
         .then(() => {
           setTimeout(() => {
             modalActivation.value = false;
-          }, 2000);
+          }, 1000);
         });
     };
 
@@ -170,26 +191,6 @@ const closeError = () => {
     console.log(errorP.value);
   }
 };
-
-// const saveProfile = async () => {
-//   const user = firebase.auth().currentUser;
-//   const credential = firebase.auth.EmailAuthProvider.credential(
-//     userData.value.email,
-//     password.value
-//   );
-//   user!.reauthenticateWithCredential(credential).catch((error) => {
-//     console.log(error);
-//     if (error.code == "auth/missing-password") {
-//       errorP.value = true;
-//       errorMsg.value = "Wrong password";
-//       return;
-//     } else if (error.code == "auth/too-many-requests") {
-//       errorP.value = true;
-//       errorMsg.value = "Too many requests, login temporarily disabled";
-//       return;
-//     }
-//   });
-// };
 
 const saveProfile = async () => {
   errorP.value = false;
@@ -338,8 +339,6 @@ onMounted(() => {});
         />
       </transition>
 
-      
-
       <div class="profile-pic">
         <div class="prof-content">
           <img v-bind:src="userPFP || Logo" @load="imgLoaded = !imgLoaded" />
@@ -357,19 +356,19 @@ onMounted(() => {});
         v-click-away="closeError"
         :class="[pwOp ? '' : 'op']"
       >
-      <transition name="modal">
-        <Modal
-          class="modal"
-          v-if="modalActivation"
-          :position="'absolute'"
-          :modalAnimation="modalAnimation"
-          :loadingScale="2"
-          :modalLoadingMessage="modalLoadingMessage"
-          :modalButtonMessage="modalButtonMessage"
-          :spinnerColor="'var(--color-nav-txt)'"
-          v-click-away="modalClickAwayFunction"
-        />
-      </transition>
+        <transition name="modal">
+          <Modal
+            class="modal"
+            v-if="modalActivation"
+            :position="'absolute'"
+            :modalAnimation="modalAnimation"
+            :loadingScale="2"
+            :modalLoadingMessage="modalLoadingMessage"
+            :modalButtonMessage="modalButtonMessage"
+            :spinnerColor="'var(--color-nav-txt)'"
+            v-click-away="modalClickAwayFunction"
+          />
+        </transition>
         <div class="inputs">
           <div class="field">
             <div class="icon">
@@ -593,7 +592,7 @@ onMounted(() => {});
       padding: 50px 50px 50px 50px;
       gap: 30px;
       transition: all 0.2s ease-in-out;
-      overflow:hidden;
+      overflow: hidden;
 
       .inputs {
         display: flex;
@@ -748,8 +747,6 @@ onMounted(() => {});
     }
   }
 }
-
-
 
 .error-enter-active,
 .error-leave-active {

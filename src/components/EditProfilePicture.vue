@@ -11,14 +11,15 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import Modal from "../components/Modal.vue";
-import { modalButtonActive } from "../store/modalButtonActive";
+import db from "../firebase/firebaseInit";
+import { doc, updateDoc } from "firebase/firestore";
 
 const selectedFile = ref();
 const dialog = ref(false);
 const fileUpload = ref();
 const profPicState = profPicClose();
 const cropper = ref() as any;
-const showCropButton = ref(false)
+const showCropButton = ref(false);
 const uploadProgress = ref();
 
 const modalActivation = ref(false);
@@ -31,7 +32,7 @@ currentPFP.value = localStorage.getItem("avatar");
 const destination = ref();
 
 const onFileSelect = (e) => {
-  showCropButton.value= true
+  showCropButton.value = true;
 
   dialog.value = true;
   const file = e.target.files[0];
@@ -59,7 +60,6 @@ const closePicPanel = () => {
   profPicClose();
   console.log(profPicState.state);
 };
-
 
 const handleCropped = () => {
   function getRoundedCanvas(sourceCanvas) {
@@ -109,13 +109,11 @@ const handleCropped = () => {
   }
 
   roundedCanvasOutside.value = dataURLtoBlob(destination.value);
-
 };
-
 
 const roundedCanvasOutside = ref();
 
-const UploadImage = () => {
+const UploadImage = async () => {
   modalActivation.value = true;
   modalAnimation.value = true;
 
@@ -173,6 +171,12 @@ const UploadImage = () => {
       }, 1500);
     }
   );
+console.log(destination.value)
+var docRef = firebase.firestore().collection("users").doc(firebase.auth().currentUser!.uid);
+
+docRef.update({profilePic: destination.value})
+
+
 };
 </script>
 
@@ -180,14 +184,13 @@ const UploadImage = () => {
   <div class="editingPanel-wrapper">
     <transition name="modal">
       <Modal
-      class="modal"
+        class="modal"
         v-if="modalActivation"
         :modalLoadingMessage="modalLoadingMessage"
         :modalAnimation="modalAnimation"
       />
     </transition>
     <input
-    
       class="backButton"
       type="button"
       @click="closePicPanel"
@@ -215,7 +218,7 @@ const UploadImage = () => {
         v-if="selectedFile && !destination"
       ></VueCropper>
       <input
-      v-if="showCropButton"
+        v-if="showCropButton"
         type="button"
         value="Crop"
         @click="handleCropped"
@@ -308,7 +311,7 @@ const UploadImage = () => {
   }
 
   .editingPanel {
-    position:relative;
+    position: relative;
     display: flex;
     flex-direction: column;
     justify-content: center;

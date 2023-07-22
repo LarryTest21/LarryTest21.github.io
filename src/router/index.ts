@@ -201,7 +201,7 @@ router.beforeEach((to, from, next) => {
     else if(to.name == "adminpage") {
       setTimeout(() => {
         next()
-      }, 500);
+      }, 100);
     }
   else next();
 });

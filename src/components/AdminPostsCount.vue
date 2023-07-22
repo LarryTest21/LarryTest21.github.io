@@ -86,7 +86,6 @@ a {
   padding: 10px;
   color: var(--color-nav-txt);
   border-style: none;
-  box-shadow: 2px 2px 5px 1px rgba(0, 0, 0, 0.3);
   background-color: var(--color-nav-bg);
   transition: all 0.2s ease-in-out;
 }
@@ -108,7 +107,6 @@ a:active {
   font-family: Roboto Condensed;
   font-weight: 800;
   border-radius: 20px;
-  box-shadow: 4px 4px 2px 1px rgba(0, 0, 0, 0.3);
   gap: 30px;
   display: flex;
   flex-direction: column;
