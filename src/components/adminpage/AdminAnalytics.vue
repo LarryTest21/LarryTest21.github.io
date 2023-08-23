@@ -35,17 +35,7 @@ const data = ref<ChartData<'pie'>>({
     datasets: [],
 });
 
-const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: true,
-    plugins: {
-        legend: {
-            display: true,
-            rtl: true
-        }
-    }
-}
+
 const pageVisitsMonths = ref([]) as any
 const pageVisitsMonths2 = ref() as any
 const pageVisitsMonthNames = ref() as any
@@ -152,7 +142,7 @@ onMounted(async () => {
             <div class="detail-analytics">
 
                 <div class="pageviews-pie" v-if="detailsPressed">
-                    <Pie :data="data" :options="options" />
+                    <Pie :data="data" />
                 </div>
             </div>
         </div>
