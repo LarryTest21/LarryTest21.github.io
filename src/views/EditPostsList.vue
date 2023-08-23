@@ -3,14 +3,14 @@ import { ref, watch, computed, toRaw, onUnmounted, onMounted } from "vue";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import db from "../firebase/firebaseInit";
-import { useLoaderState } from "@/store/isloading";
+import { isLoading } from "@/store/isloading";
 import differenceBy from "lodash/differenceBy";
 import $ from "jquery";
 import { doc, deleteDoc } from "firebase/firestore";
 import moment from "moment";
 
-const isLoading = useLoaderState();
-const { changeStateFalse } = isLoading;
+const isLoadingCheck = isLoading();
+isLoadingCheck.state = false
 
 const blogPostsRefreshArray = ref([]) as any;
 const newsPostsRefreshArray = ref([]) as any;
@@ -93,7 +93,7 @@ const initialNewsPostRequest = async () => {
       console.log(err);
     })
     .then(() => {
-      changeStateFalse();
+      isLoadingCheck.state = false
     });
 };
 
@@ -112,7 +112,7 @@ const initialBlogPostRequest = async () => {
       console.log(err);
     })
     .then(() => {
-      changeStateFalse();
+      isLoadingCheck.state = false
     });
 };
 const refreshNewsPostRequest = () => {
