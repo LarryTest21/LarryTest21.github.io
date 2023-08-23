@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
-import { userClicked } from "@/store/userClicked";
+import { userTabClick } from "@/store/userTabClick";
 import { userClickedMobile } from "@/store/userClickMobile";
 import { useRoute } from "vue-router";
 import { getBlob, getStorage, ref as storageFBRef } from "firebase/storage";
@@ -14,9 +14,11 @@ import { mobileIconClicked } from "@/store/mobileIconClicked";
 
 const mobileIClicked = mobileIconClicked();
 
-
+const props = defineProps({
+  isAdminCheck: String,
+})
 const userClickMobile = userClickedMobile();
-const userClick = userClicked();
+const userClick = userTabClick();
 
 const signedInCheck = signedIn();
 const activateLoginTab = ref(false);
@@ -71,8 +73,7 @@ checkPFP();
 
 const logOut = () => {
   const signedInCheck = signedIn();
-  const { signedInFalse } = signedInCheck;
-  signedInFalse();
+  signedInCheck.state = false;
   firebase.auth().signOut();
 
   if (
@@ -138,15 +139,12 @@ onMounted(() => {
       </div>
     </div>
     <div class="usertab-links" ref="userTab">
-      <router-link to="/profile"
-        >Profile</router-link
-      >
-      <router-link to="/createpost/newPost"
-        >Create Post</router-link
-      >
-      <router-link to="/editpostslist"
-        >Edit Posts</router-link
-      >
+      <router-link to="/profile">Profile</router-link>
+      <router-link to="/createpost/newPost">Create Post</router-link>
+      <router-link to="/editpostslist" v-if="!props.isAdminCheck">Edit Posts</router-link>
+      <router-link @click.native.prevent="userClick" to="/adminpage" v-if="props.isAdminCheck === 'admin'">Admin
+        Page</router-link>
+
       <a @click.stop.prevent="logOut()">Logout</a>
     </div>
   </div>
@@ -169,18 +167,22 @@ onMounted(() => {
     margin-bottom: 20px;
     font-size: 1.2rem;
     gap: 10px;
+
     .userPFP {
       height: 70px;
+
       img {
         height: 100%;
       }
     }
   }
+
   .usertab-links {
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
+
     a {
       padding: 10px;
       text-decoration: none;
@@ -189,14 +191,17 @@ onMounted(() => {
       font-family: Chango;
       color: var(--color-nav-txt);
     }
+
     a:hover {
       background-color: var(--color-nav-txt);
       color: var(--vt-c-nav-text-hover);
       cursor: pointer;
     }
+
     a::after {
       box-shadow: none;
     }
   }
 }
 </style>
+@/store/userTabClick

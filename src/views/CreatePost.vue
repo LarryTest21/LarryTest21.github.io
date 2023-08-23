@@ -4,15 +4,14 @@ import $ from "jquery";
 import DownIcon from "@/components/icons/down.vue";
 import { QuillEditor } from "@vueup/vue-quill";
 import "firebase/auth";
-import Side from "@/components/CreatePostSide.vue";
-import Preview from "@/components/CreatePostPreview.vue";
+import Side from "@/components/createpost/CreatePostSide.vue";
+import Preview from "@/components/createpost/CreatePostPreview.vue";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import db from "../firebase/firebaseInit";
-import Dialogue from "@/components/SavedPostDialogue.vue";
+import Dialogue from "@/components/createpost/SavedPostDialogue.vue";
 import { useRoute } from "vue-router";
 import Multiselect from "vue-multiselect";
-import CreatePostSide from "@/components/CreatePostSide.vue";
 import "@/assets/vueup.scss";
 import "@/assets/multiselect.scss";
 
@@ -153,13 +152,18 @@ const dialogueDelete = async () => {
 };
 
 const scrollToBottom = () => {
-    $(".ql-editor").scrollTop($(".ql-editor")[0].scrollHeight);
-  };
+  $(".ql-editor").scrollTop($(".ql-editor")[0].scrollHeight);
+};
 //GETTING AUTHOR NAME
 const postExcerpt = ref();
 const blogPostData = ref() as any;
 const route = useRoute();
 const rawImg = ref(null) as any;
+
+const savedPostData = ref();
+const savedPostDate = ref()
+
+
 onMounted(() => {
   quillEditor.value = document.querySelector(".ql-editor");
   window.addEventListener("keydown", (e) => {
@@ -186,22 +190,20 @@ onMounted(() => {
     scrollToBottom();
   });
 
-
-
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-      if (route.params.createSlug !== undefined) {
+      if (route.params.createSlug !== "newPost") {
         const dataBase = db
           .collection("blogposts")
           .doc(route.params.createSlug.toString());
         dataBase
           .get()
           .then((doc) => {
-            blogPostData.value = doc.data();
+            savedPostData.value = doc.data();
           })
           .then(() => {
             if (blogPostData.value !== undefined) {
-              postDate.value = blogPostData.value.postDate;
+              savedPostDate.value = blogPostData.value.postDate;
               postAuthor.value = blogPostData.value.postAuthor;
               postContent.value = blogPostData.value.postContent;
               postTitle.value = blogPostData.value.postTitle;
@@ -222,23 +224,11 @@ onMounted(() => {
 <template>
   <div class="createpost-wrapper">
     <transition name="savedDialogue">
-      <Dialogue
-        v-if="savedDialogue"
-        @button-yes="dialogueYes"
-        @button-no="dialogueNo"
-        @button-delete="dialogueDelete"
-      />
+      <Dialogue v-if="savedDialogue" @button-yes="dialogueYes" @button-no="dialogueNo" @button-delete="dialogueDelete" />
     </transition>
     <transition name="preview">
-      <Preview
-        v-if="showPreview"
-        @showPreview="onShowPostPreview"
-        :postTitle="postTitle"
-        :postContent="postContent"
-        :postDate="postDate"
-        :postUpload="postUploadTime"
-        :postAuthor="postAuthor"
-      />
+      <Preview v-if="showPreview" @showPreview="onShowPostPreview" :postTitle="postTitle" :postContent="postContent"
+        :postDate="postDate" :postUpload="postUploadTime" :postAuthor="postAuthor" />
     </transition>
 
     <div class="container">
@@ -251,27 +241,16 @@ onMounted(() => {
           <div class="selection-wrapper">
             <div class="blog-section-wrapper">
               <label class="blog-category">Section</label>
-              <VueMultiselect
-                class="multiselect"
-                v-model="singleSelected"
-                :options="singleSelectOptions"
-                :searchable="false"
-                placeholder="Select section"
-              >
-              </VueMultiselect>
+              <Multiselect class="multiselect" v-model="singleSelected" :options="singleSelectOptions" :searchable="false"
+                placeholder="Select section">
+              </Multiselect>
             </div>
             <div class="blog-category-wrapper" v-show="blogSelected">
               <label class="blog-category">Category</label>
 
-              <VueMultiselect
-                class="multiselect"
-                v-model="multiSelectSelected"
-                :options="multiSelectOptions"
-                :multiple="true"
-                :searchable="false"
-                placeholder="Select category"
-              >
-              </VueMultiselect>
+              <Multiselect class="multiselect" v-model="multiSelectSelected" :options="multiSelectOptions"
+                :multiple="true" :searchable="false" placeholder="Select category">
+              </Multiselect>
             </div>
           </div>
         </div>
@@ -280,32 +259,16 @@ onMounted(() => {
             <transition name="downIcon">
               <DownIcon class="downIcon" ref="downIcon" v-show="doOnce" />
             </transition>
-            <QuillEditor
-              v-model:content="postContent"
-              contentType="html"
-              :toolbar="toolbarOptions"
-              @text-change="quillBottom"
-            />
+            <QuillEditor v-model:content="postContent" contentType="html" :toolbar="toolbarOptions"
+              @text-change="quillBottom" />
           </div>
         </div>
       </div>
-      <Side
-        ref="side"
-        :postTitle="postTitle"
-        :postContent="postContent"
-        :postAuthor="postAuthor"
-        :postDate="postDate"
-        :checkSavedPost="checkSavedPost"
-        :rawImg="rawImg"
-        :postExcerpt="postExcerpt"
-        :postID="postID"
-        :postSection="singleSelected"
-        :postCategory="multiSelectSelected"
-        @showPreview="onShowPostPreviewTrue"
-        @postDate="postDateFn"
-        @post-content="postContentFn"
-        @post-title="postTitleFn"
-      />
+      <Side ref="side" :postTitle="postTitle" :postContent="postContent" :postAuthor="postAuthor"
+        :postDate="savedPostDate" :checkSavedPost="checkSavedPost" :rawImg="rawImg" :postExcerpt="postExcerpt"
+        :postID="postID" :postSection="singleSelected" :postCategory="multiSelectSelected"
+        @showPreview="onShowPostPreviewTrue" @postDate="postDateFn" @post-content="postContentFn"
+        @post-title="postTitleFn" />
     </div>
   </div>
 </template>
@@ -324,6 +287,7 @@ onMounted(() => {
 .createpost-wrapper {
   position: relative;
   height: 100vh;
+
   .container {
     height: calc(100vh - 70px);
     padding: 20px;
@@ -353,10 +317,12 @@ onMounted(() => {
         border-bottom: solid 2px rgba(0, 0, 0, 0.2);
         border-radius: 10px 10px 0 0;
       }
+
       .editor-top-wrapper {
         display: flex;
         justify-content: space-between;
         gap: 20px;
+
         .blog-title-wrapper {
           width: 50%;
           height: 90px;
@@ -383,6 +349,7 @@ onMounted(() => {
             color: var(--color-nav-txt);
           }
         }
+
         .selection-wrapper {
           width: 50%;
           height: 100px;
@@ -398,6 +365,7 @@ onMounted(() => {
             width: 100%;
             color: rgba(0, 0, 0, 0.5);
           }
+
           .blog-section-wrapper {
             display: flex;
             flex-direction: column;
@@ -414,6 +382,7 @@ onMounted(() => {
         overflow-y: auto;
         height: 100%;
         width: 100%;
+
         .editor {
           position: relative;
           display: flex;
@@ -423,6 +392,7 @@ onMounted(() => {
           height: 100%;
           left: 0;
           right: 0;
+
           .downIcon {
             width: 70px;
             height: 70px;
@@ -481,6 +451,7 @@ onMounted(() => {
   opacity: 0;
   max-height: 0;
 }
+
 .savedDialogue-enter-active,
 .savedDialogue-leave-active {
   max-height: 160px;

@@ -1,4 +1,4 @@
-import { useLoaderState } from "@/store/isloading";
+import { isLoading } from "@/store/isloading";
 import { createRouter, createWebHistory } from "vue-router";
 import "jquery";
 import $ from "jquery";
@@ -7,6 +7,9 @@ import { ref, watch } from "vue";
 import { isAdmin } from "@/store/isAdmin";
 import { trackRouter } from "vue-gtag-next";
 import { settings } from "firebase/analytics";
+import { postLoaded } from "@/store/postLoaded";
+import { storeRouterAnalytics } from "@/components/myAnalytics";
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -141,7 +144,7 @@ const router = createRouter({
     },
     {
       path: "/blog/:blogSlug",
-      name: "post",
+      name: "blogpost",
       component: () =>
         import(/* webpackChunkName: "BlogPost" */ "../views/BlogPost.vue"),
     },
@@ -151,37 +154,51 @@ const router = createRouter({
       component: () =>
         import(/* webpackChunkName: "BlogPost" */ "../views/PageNotFound.vue"),
     },
+    {
+      path: "/test",
+      name: "test",
+      component: () =>
+        import(/* webpackChunkName: "BlogPost" */ "../views/Test.vue"),
+    },
+    {
+      path: "/regactivation/:activationToken",
+      name: "regactivation",
+      component: () =>
+        import(/* webpackChunkName: "BlogPost" */ "../views/RegActivation.vue"),
+    },
   ],
 });
 
-
-
 trackRouter(router);
 
-router.beforeEach((to, from, next) => {
-  const isLoading = useLoaderState();
-  const { changeStateTrue } = isLoading;
+storeRouterAnalytics(router);
 
+router.beforeEach((to, from, next) => {
+  const isLoadingCheck = isLoading();
+  isLoadingCheck.state = true
+  const postLoad = postLoaded();
+  const { postStateFalse } = postLoad;
+  postStateFalse();
   if (to.name === "bsl" || to.name === "news" || to.name === "profile") {
     next();
-  } else if (to.name === "post" || to.name === "newspost") {
+  } else if (to.name === "blogpost" || to.name === "newspost") {
     next();
   } else {
-    changeStateTrue();
+    isLoadingCheck.state = false
     next();
   }
 });
 
-router.afterEach((to) => {
+router.afterEach((to, from) => {
   const mountApp = onMountApp();
-  const isLoading = useLoaderState();
-  const { changeStateFalse } = isLoading;
+  const isLoadingCheck = isLoading();
+  isLoadingCheck.state = true
 
   if (to.path === "/editpostslist") {
   } else {
     setTimeout(() => {
       if (mountApp.state) {
-        changeStateFalse();
+        isLoadingCheck.state = false
       }
     }, 300);
   }
@@ -196,14 +213,12 @@ router.beforeEach((to, from, next) => {
     (to.name == "editpostslist" && !isAuthenticated) ||
     (to.name == "createpost" && !isAuthenticated)
   )
-    next({ name: "login" })
-
-    else if(to.name == "adminpage") {
-      setTimeout(() => {
-        next()
-      }, 100);
-    }
-  else next();
+    next({ name: "login" });
+  else if (to.name == "adminpage") {
+    setTimeout(() => {
+      next();
+    }, 10);
+  } else next();
 });
 
 function guardRouteUser(to, from, next) {
@@ -218,7 +233,7 @@ function guardRouteUser(to, from, next) {
   }
 }
 function guardRouteAdmin(to, from, next) {
-  const isAdminCheck =  isAdmin();
+  const isAdminCheck = isAdmin();
 
   setTimeout(() => {
     if (isAdminCheck.state) {
@@ -226,7 +241,7 @@ function guardRouteAdmin(to, from, next) {
     } else {
       next("/"); // go to '/login';
     }
-  }, 300);
+  }, 600);
 }
 
 export default router;

@@ -1,103 +1,25 @@
 <script setup lang="ts">
 
-
-import axios from "axios";
 import { ref, reactive } from "vue";
 import { onMounted } from "vue";
 import moment from "moment";
 
-import Cosmic from "cosmicjs";
 
-/* const Cosmic = require("cosmicjs");
-const api = Cosmic(); */
- 
-/* const bucket = api.bucket({
-  slug: "c27229f0-9018-11ed-b853-65fa50acc7e7",
-  read_key: "G71yMNlvizQCtrvVyp9Z1AecQp8a4RTr5dl9uEGi6nst9FNQIW",
-}); */
-/*
-const data = await bucket.objects
-  .find({
-    type: "posts", // Object Type slug
-  })
-  .props("title,slug,metadata") // response properties
-  .limit(10); // number of Objects to be returned
- */
 
- 
-
-const postsUrl = "https://api.cosmicjs.com/v2/buckets/c27229f0-9018-11ed-b853-65fa50acc7e7/objects?pretty=true&query=%7B%22type%22%3A%22posts%22%7D&read_key=G71yMNlvizQCtrvVyp9Z1AecQp8a4RTr5dl9uEGi6nst9FNQIW&limit=20&props=slug,title,content,date";
-const posts = ref([] as any);
-
-const isLoading = ref(false);
-const postsLoadOk = ref(false);
-const errorCaught = ref(false);
-
-var queryOptions = {
-  _embed: true,
-};
-
-const getPosts = () => {
-  isLoading.value = true;
-
-  axios
-    .get(postsUrl, { params: queryOptions })
-    .then((response) => {
-      posts.value = response.data;
-      console.log(posts.value)
-    })
-    .then(() => {
-      isLoading.value = false;
-      console.log(isLoading.value);
-    })
-    .catch((error) => {
-      if (error) {
-        errorCaught.value = true;
-      }
-    })
-
-    .then(() => {
-      postsLoadOk.value = true;
-    });
-};
-
-onMounted(async () => {
-  getPosts();
-});
 </script>
 
 <template>
   <div class="news-container">
     <div class="wrapper">
       <div class="news-topper">
-        <span>This is the News</span>
+        <span>Custom Teams</span>
         <transition name="fadeLoading">
-          <div class="errorCaught" v-if="errorCaught">
+          <div class="errorCaught" >
             There was an error loading news
           </div>
         </transition>
       </div>
-      <transition name="fadeLoading">
-        <div v-if="isLoading" class="posts-loading">
-          <div></div>
-        </div>
-      </transition>
-      <ul v-if="!isLoading" class="news-posts-ul" v-for="post in posts">
-        <div class="posts-card">
-   
-          <div class="posts-date">
-
-          </div>
-
-          <div class="posts-text">
-            <h1 class="posts-title">{{ post.id }}</h1>
-
-            <p class="posts-excerpt">
-              {{ post.content }}
-            </p>
-          </div>
-        </div>
-      </ul>
+    
     </div>
   </div>
 </template>

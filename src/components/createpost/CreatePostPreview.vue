@@ -12,7 +12,7 @@ const showCoverPreviewFunction = () => {
 const props = defineProps({
   postTitle: String,
   postAuthor: String,
-  postDate: Timestamp,
+  postDate: String,
   postContent: String,
 });
 
@@ -23,7 +23,7 @@ const postcontent = ref() as any;
 
 const postTitle = ref(props.postTitle) as any;
 const postAuthor = ref(props.postAuthor);
-const postDate = ref(new Date(props.postDate!.toDate())) as any;
+const postDate = ref(props.postDate) as any;
 const postContent = ref(props.postContent) as any;
 
 //DATE FUNCTIONS
@@ -35,8 +35,7 @@ const options = {
   hour: "numeric",
   minute: "numeric",
 };
-
-const newDate = moment(postDate.value).format("MMMM Do YYYY, h:mm:ss a");
+const newDate = moment(Date.parse(postDate.value)).format("MMMM Do YYYY, h:mm:ss a");
 //GETTING AUTHOR NAME
 
 onMounted(() => {

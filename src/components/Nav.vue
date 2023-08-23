@@ -6,14 +6,32 @@ import $ from "jquery";
 import gsap from "gsap";
 import LoginTab from "@/components/LoginTab.vue";
 import UserTab from "@/components/UserTab.vue";
-import { modalActive } from "../store/modalActive";
-import { signedIn } from "../store/signedIn";
-import { userClicked } from "@/store/userClicked";
+import { modalActive } from "@/store/modalActive";
+import { signedIn } from "@/store/signedIn";
+import { userTabClick } from "@/store/userTabClick";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import Englishflag from "@/assets/logos/English_language.svg";
 import Hungaryflag from "@/assets/logos/Hungary_Flag.svg";
 import { isAdmin } from "@/store/isAdmin";
+import { newUser } from "@/store/newUser"
+import db from "../firebase/firebaseInit";
+import { getDoc, doc } from "firebase/firestore";
+
+
+const notificationArray = ref([]) as any
+const notifCounter = ref(0)
+const isActivated = ref()
+const showNotif = ref(false)
+watch(notificationArray.value, (newValue) => {
+  if (!isActivated.value) {
+    notifCounter.value = notificationArray.value.length + 1
+  } else {
+    notifCounter.value = notificationArray.value.length
+
+  }
+})
+const checkNewUser = newUser()
 
 const isAdminCheck = isAdmin();
 
@@ -42,14 +60,6 @@ $.ajax({
   },
 });
 
-// if(on.country.name == "Hungary"){
-//   console.log("szevasz")
-//   langHu.value = true;
-//   langEn.value = true;
-
-// }else {
-//   langEn.value = true;
-// }
 
 const loginActivated = ref(false);
 const signedInCheck = signedIn();
@@ -57,15 +67,11 @@ const activateLoginTab = ref(false);
 
 const displayName = ref();
 
-const userClick = userClicked();
+const userTabClicked = userTabClick();
 
-const initialName = ref();
-
-const userClearance = ref();
-
-const loggedIn = ref();
-loggedIn.value = localStorage.getItem("isLoggedIn");
-
+watch(userTabClicked, () => {
+  showNotif.value = false
+})
 const activeLogin = () => {
   if (!activateLoginTab.value) {
     activateLoginTab.value = true;
@@ -82,8 +88,8 @@ const closeLoginTab = () => {
 };
 
 const closeProfileTab = () => {
-  if (userClick) {
-    userClick.state = false;
+  if (userTabClicked) {
+    userTabClicked.state = false;
   }
 };
 
@@ -138,14 +144,11 @@ theme_checked.value =
   JSON.parse(localStorage.getItem("theme-checked") as string) || false;
 
 //LOGIN
-watch(signedIn, (newValue, oldValue) => {
-  localStorage.setItem("loggedIn", JSON.stringify(newValue));
-});
 watch(signedInCheck, (newValue) => {
   if (signedInCheck.state) {
     activateLoginTab.value = false;
   } else {
-    userClick.state = false;
+    userTabClicked.state = false;
   }
 });
 
@@ -174,7 +177,6 @@ timeCurrent();
 //WEATHER SCRIPT
 var getIP = "https://geolocation-db.com/json/";
 var openWeatherMap = "https://api.openweathermap.org/data/2.5/weather/";
-const location2 = ref();
 
 const city = ref();
 const temp = ref();
@@ -193,26 +195,6 @@ const getWeather2 = () => {
   });
 };
 
-// const getWeather = () => {
-//   $.getJSON(getIP).done(function (location) {
-//     $.getJSON(openWeatherMap, {
-//       lat: location.latitude,
-//       lon: location.longitude,
-//       units: "metric",
-//       APPID: "20fd3e315880d30f3beed6621ed06ee1",
-//     }).done(function (weather) {
-//       0;
-//       $(".weather").append(
-//         location.city +
-//           "," +
-//           " " +
-//           Math.round(weather.main.temp) +
-//           " " +
-//           "Celsius"
-//       );
-//     });
-//   });
-// };
 
 //WEATHER HOVERING
 const weatherHovered = () => {
@@ -223,10 +205,9 @@ const weatherUnHovered = () => {
 };
 
 //ACTIVATION LOGIN TAB
-
+const userDisplayName = ref()
 const navRef = ref();
 const UserTabHeight = ref();
-
 //START ON MOUNT
 onMounted(() => {
   onMountApp.value = true;
@@ -235,39 +216,61 @@ onMounted(() => {
   loginActivated.value = JSON.parse(localStorage.getItem("loggedInBefore")!);
 
   gsap.from(".nav-links a", {
-    delay: 0.3,
+    delay: 0.5,
     duration: 0.2,
     stagger: 0.05,
-    y: -70,
-  });
-  gsap.from(".weather-time", { delay: 0.8, opacity: 0 });
-  gsap.from(".theme-changer-wrapper", { delay: 0.8, opacity: 0 });
+    y: -100,
+  }).then(() => {
+    showNotif.value = true
+  });;
+  gsap.from(".weather-time", { delay: 0.8, opacity: 0 })
+  gsap.from(".theme-changer-wrapper", { delay: 0.8, opacity: 0 })
 
-  firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
 
+  firebase.auth().onAuthStateChanged(async (user) => {
+
+
+    if (!checkNewUser.state) {
 
       //Check if User logged in
-      if (firebase.auth().currentUser?.uid != undefined) {
+
+      if (user) {
         signedInCheck.state = true;
         loginActivated.value = true;
         activateLoginTab.value = false;
-      }
-      //Creating initials
-      var getInitials = function (name) {
-        var parts = name.split(" ");
-        var initials = "";
-        for (var i = 0; i < parts.length; i++) {
-          if (parts[i].length > 0 && parts[i] !== "") {
-            initials += parts[i][0];
-          }
+
+
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        userDisplayName.value = userDoc.data()!['displayName'].toString();
+        isActivated.value = userDoc.data()!['activated'];
+
+        if (!isActivated.value) {
+          var test = { 'test': 'test' }
+          notificationArray.value.push(test)
+
         }
-        return initials;
-      };
-      initialName.value = firebase.auth().currentUser?.displayName;
-      displayName.value = getInitials(initialName.value);
-    } else {
-      signedInCheck.state = false;
+        //Creating initials
+        var getInitials = function (nameValue) {
+          var parts = nameValue.split(" ");
+          var initials = "";
+          for (var i = 0; i < parts.length; i++) {
+            if (parts[i].length > 0 && parts[i] !== "") {
+              initials += parts[i][0];
+            }
+          }
+          return initials;
+        };
+
+
+        //Get initials
+        if (userDisplayName.value != undefined) {
+          displayName.value = getInitials(userDisplayName.value);
+        }
+
+      } else {
+        signedInCheck.state = false;
+      }
     }
   });
 
@@ -278,10 +281,19 @@ onMounted(() => {
     }, 2000);
   }, 15000);
 });
+
+const notifClickedRef = ref(false)
+const notifClicked = (value) => {
+  notifClickedRef.value = true
+}
+
 </script>
 
 <template>
   <header class="fullNav" ref="navRef">
+    <div class="notif-wrapper" v-if="notifCounter">
+    </div>
+
     <div class="wrapper">
       <nav :class="currentTheme">
         <ul class="nav-links">
@@ -290,45 +302,47 @@ onMounted(() => {
               <img class="logo" :src="Logo" />
             </div>
           </RouterLink>
-          <div class="user-wrapper">
+          <a class="user-wrapper">
+            <transition name="notif">
+              <div class="notif-counter" v-if="notifCounter != 0 && showNotif">{{ notifCounter }}</div>
+
+            </transition>
+
             <TransitionGroup name="user">
-              <a
-                key="2"
-                v-show="!signedInCheck.state && loginActivated"
-                to="/login"
-                class="login"
-                @click.stop.prevent="activeLogin()"
-                :class="activateLoginTab ? 'active' : ''"
-              >
-                <li>Login</li>
-              </a>
-              <a
-                key="1"
-                v-show="signedInCheck.state"
-                class="user"
-                @click.native.prevent="userClick.state = !userClick.state"
-              >
+              <a key="1" v-if="signedInCheck.state" class="user"
+                @click.native.prevent="userTabClicked.state = !userTabClicked.state">
                 {{ displayName }}
               </a>
+              <a key="2" v-if="!signedInCheck.state && loginActivated" to="/login" class="login"
+                @click.stop.prevent="activeLogin()" :class="activateLoginTab ? 'active' : ''">
+                <li>Login</li>
+              </a>
+
             </TransitionGroup>
-          </div>
-          <RouterLink to="/rulebook"><li>Rulebook</li></RouterLink>
-          <RouterLink to="/news"><li>News</li></RouterLink>
-          <RouterLink to="/bsl"><li>BSL</li></RouterLink>
-          <RouterLink to="/custom-teams"><li>Custom Teams</li></RouterLink>
-          <RouterLink to="/contact"><li>Contact</li></RouterLink>
+          </a>
+          <RouterLink to="/rulebook">
+            <li>Rulebook</li>
+          </RouterLink>
+          <RouterLink to="/news">
+            <li>News</li>
+          </RouterLink>
+          <RouterLink to="/bsl">
+            <li>BSL</li>
+          </RouterLink>
+          <RouterLink to="/custom-teams">
+            <li>Custom Teams</li>
+          </RouterLink>
+          <RouterLink to="/contact">
+            <li>Contact</li>
+          </RouterLink>
         </ul>
 
         <div class="wt-wrapper">
-          <div
-            @mouseover="weatherHovered"
-            @mouseleave="weatherUnHovered"
-            :class="[
-              'weather-time',
-              { active: weatherHov },
-              timeWeatherUp ? 'up' : 'down',
-            ]"
-          >
+          <div @mouseover="weatherHovered" @mouseleave="weatherUnHovered" :class="[
+            'weather-time',
+            { active: weatherHov },
+            timeWeatherUp ? 'up' : 'down',
+          ]">
             <div class="time">{{ time }}</div>
             <div class="weather">
               <div class="city">{{ city }}</div>
@@ -339,30 +353,19 @@ onMounted(() => {
         <div class="language-wrapper"></div>
         <div class="theme-changer-wrapper">
           <label class="theme-changer">
-            <input
-              v-model="theme_checked"
-              type="checkbox"
-              class="button"
-              @click="themechange()"
-              :class="currentTheme"
-            />
+            <input v-model="theme_checked" type="checkbox" class="button" @click="themechange()" :class="currentTheme" />
             <span class="slider round"></span>
           </label>
         </div>
 
         <transition name="fadeLogin">
-          <LoginTab
-            v-if="activateLoginTab && !signedInCheck.state"
-            v-click-away="closeLoginTab"
-          />
+          <LoginTab v-if="activateLoginTab && !signedInCheck.state" v-click-away="closeLoginTab"
+            @emitRegister="activateLoginTab = !activateLoginTab" />
         </transition>
         <transition name="userTab">
-          <UserTab
-            ref="UserTabHeight"
-            v-if="signedInCheck.state && userClick.state"
-            v-click-away="closeProfileTab"
-            :isAdminCheck="isAdminCheck.state"
-          />
+          <UserTab ref="UserTabHeight" v-if="signedInCheck.state && userTabClicked.state" @notifClicked="notifClicked"
+            v-click-away="closeProfileTab" :isAdminCheck="isAdminCheck.state" :notifCounter="notifCounter"
+            :notificationArray="notificationArray" :isActivated="isActivated" />
         </transition>
       </nav>
     </div>
@@ -383,7 +386,7 @@ onMounted(() => {
     nav {
       background-color: var(--color-nav-bg);
       border-radius: 70px 0 0 70px;
-      box-shadow: 4px 4px 5px 5px rgba(0, 0, 0, 0.3);
+      box-shadow: 4px 8px 5px 0px rgba(0, 0, 0, 0.3);
       gap: 40px;
       height: 100%;
       width: 100vw;
@@ -392,23 +395,23 @@ onMounted(() => {
       align-items: center;
       justify-content: space-between;
       transition: all 0.5s ease-out;
+      overflow: hidden;
 
       .nav-links {
         height: 100%;
         width: 80%;
         display: flex;
-        justify-content: space-between;
-        gap: 20px;
         margin-block-start: 0;
         padding-inline-start: 0;
 
         a {
+          position: relative;
           color: var(--color-nav-txt);
           text-decoration: none;
           font-size: 1.5rem;
           text-transform: uppercase;
           font-family: Chango;
-          padding: 0 1rem;
+          padding: 0 2rem;
           transition: font 0.1s, background-color 0.3s, box-shadow 0.1s;
           overflow: hidden;
 
@@ -419,6 +422,8 @@ onMounted(() => {
             align-items: center;
             height: 100%;
             transition: all 0.2s;
+            overflow: hidden;
+
           }
         }
 
@@ -428,14 +433,16 @@ onMounted(() => {
           height: 100%;
           position: absolute;
           top: 0;
-          transform: translateX(-20px);
+          transform: translateX(-35px);
           box-shadow: 0px 5px 10px 10px rgba(black, $alpha: 1);
           opacity: 0;
           transition: opacity 0.1s ease-in-out;
         }
+
         a:hover::after {
           opacity: 1;
         }
+
         a:hover {
           background-color: var(--vt-c-nav-text-bg-hover);
           color: var(--vt-c-nav-text-hover);
@@ -453,35 +460,42 @@ onMounted(() => {
           background-color: transparent;
         }
 
+        a:first-child {
+          padding: 0;
+          left: 0;
+        }
+
         a:nth-child(2).router-link-exact-active::after {
           height: 0;
           width: 0;
           box-shadow: 0px 0px 0px 0px;
         }
-        a:nth-child(2) {
-          a {
-            cursor: pointer;
-          }
-        }
 
         a:nth-child(2):hover::after {
           display: none;
         }
-        a:nth-child(1) {
-          padding: 0;
-          left: 0;
+
+        .user-wrapper:hover {
+
+          background: transparent;
+          color: var(--vt-nav-txt);
+
         }
+
 
         a.router-link-exact-active:first-child {
           background-color: transparent;
         }
+
         a.router-link-exact-active:first-child:hover {
           background-color: transparent;
         }
+
         a.router-link-exact-active {
           color: var(--vt-c-nav-text-active);
           background-color: var(--vt-c-nav-text-bg-hover);
         }
+
         a.router-link-exact-active::after {
           content: "";
           height: 100%;
@@ -492,12 +506,61 @@ onMounted(() => {
           opacity: 1;
           transition: opacity 0.3s ease-in-out;
         }
+
         .user-wrapper {
-          cursor: pointer;
           display: flex;
           justify-content: center;
           align-items: center;
           overflow: visible;
+          position: relative;
+          width: 70px;
+          height: 100%;
+          padding: 3px;
+          margin: 0 50px;
+
+          .notif-counter {
+            position: absolute;
+            background-color: rgb(32, 97, 1);
+            color: var(--color-nav-bg);
+            font-family: Roboto Condensed;
+            font-weight: 700;
+            font-size: 1.5rem;
+            z-index: 0;
+            width: 35px;
+            height: 35px;
+            padding: 1px 5px;
+            border-radius: 50%;
+            top: 0;
+            right: -25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 3px;
+            animation: fading 2s ease-in-out infinite;
+          }
+
+          @keyframes fading {
+            0% {
+              opacity: 0;
+            }
+
+            10% {
+              opacity: 1;
+            }
+
+            90% {
+              opacity: 1;
+            }
+
+            100% {
+              opacity: 0;
+            }
+          }
+
+          a {
+            cursor: pointer;
+            padding: 0;
+          }
 
           .login {
             height: 100%;
@@ -505,22 +568,28 @@ onMounted(() => {
             transition: opacity 0.2s;
             overflow: visible;
           }
+
           .login:hover {
             background-color: transparent;
             color: var(--color-nav-txt);
           }
+
           .user {
-            position: absolute;
+            position: relative;
             transition: opacity 0.2s;
             align-self: center;
-            height: 50px;
-            width: 50px;
             border-radius: 50%;
             display: flex;
+            width: 100%;
+            height: 100%;
             align-items: center;
             justify-content: center;
             background-color: var(--color-nav-txt);
             color: var(--color-nav-bg);
+
+            a {
+              position: absolute;
+            }
           }
         }
 
@@ -538,9 +607,11 @@ onMounted(() => {
       }
     }
   }
+
   .wt-wrapper {
     height: 100%;
     overflow: hidden;
+
     .weather-time {
       top: -35px;
       height: 200%;
@@ -561,10 +632,12 @@ onMounted(() => {
         align-items: center;
         justify-content: center;
         align-content: center;
+
         div {
           width: 100%;
         }
       }
+
       .time {
         width: 100%;
         height: 50%;
@@ -575,9 +648,11 @@ onMounted(() => {
         align-content: center;
       }
     }
+
     .weather-time.up {
       transform: translateY(-50%);
     }
+
     .weather-time.down {
       transform: translateY(0%);
     }
@@ -586,21 +661,23 @@ onMounted(() => {
       transform: translateY(-50%);
     }
   }
+
   .language-wrapper {
     position: relative;
     display: flex;
     flex-direction: column;
-    width: 100px;
     cursor: pointer;
+
     svg {
       border-radius: 10px;
       width: 50%;
       height: 50%;
     }
   }
+
   .theme-changer-wrapper {
     height: 100%;
-    width: 60px;
+    width: 150px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -643,20 +720,22 @@ onMounted(() => {
     transition: 0.4s;
   }
 
-  input:checked + .slider {
+  input:checked+.slider {
     background-color: rgb(235, 235, 235);
   }
-  input:checked + .slider:before {
+
+  input:checked+.slider:before {
     background-color: rgba(0, 54, 107, 1);
   }
 
-  input:focus + .slider {
+  input:focus+.slider {
     box-shadow: 0 0 1px rgb(1, 67, 131);
   }
 
-  input:checked + .slider:before {
+  input:checked+.slider:before {
     transform: translateX(26px);
   }
+
   /* Rounded sliders */
   .slider.round {
     border-radius: 34px;
@@ -683,6 +762,7 @@ onMounted(() => {
   0% {
     transform: translateY(0%);
   }
+
   100% {
     transform: translateY(-50%);
   }
@@ -692,18 +772,23 @@ onMounted(() => {
   0% {
     transform: translateY(0%);
   }
+
   35% {
     transform: translateY(0%);
   }
+
   40% {
     transform: translateY(-50%);
   }
+
   50% {
     transform: translateY(-50%);
   }
+
   55% {
     transform: translateY(0%);
   }
+
   100% {
     transform: translateY(0%);
   }
@@ -725,6 +810,7 @@ onMounted(() => {
 .user-leave-active {
   opacity: 1;
 }
+
 .user-enter-from,
 .user-leave-to {
   opacity: 0;
@@ -736,18 +822,36 @@ onMounted(() => {
   overflow: hidden;
   transition: transform 0.3s;
 }
+
 .fadeLogin-enter-from,
 .fadeLogin-leave-to {
   transform: translateY(-300px);
 }
+
 .userTab-enter-active,
 .userTab-leave-active {
   transform: translateY(0px);
+  opacity: 1;
   overflow: hidden;
   transition: transform 0.3s;
 }
+
 .userTab-enter-from,
 .userTab-leave-to {
   transform: translateY(-400px);
 }
+
+.notif-enter-active,
+.notif-leave-active {
+  transform: translateY(0px);
+  opacity: 1;
+  overflow: hidden;
+  transition: transform 0.3s;
+}
+
+.notif-enter-from,
+.notif-leave-to {
+  transform: translateY(-400px);
+}
 </style>
+@/store/userTabClick

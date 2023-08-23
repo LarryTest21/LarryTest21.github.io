@@ -25,12 +25,17 @@ const clicked = mobileIconClicked();
 <style lang="scss" scoped>
 /* TEN */
 .mobileNavIcon-wrapper {
+  margin: 10px;
   position: fixed;
   z-index: 101;
   left: 0;
-  padding: 30px;
+  padding: 10px;
   border-radius: 10px;
   transition: all 0.3s ease-in-out;
+  background-color: black;
+  background-color: var(--color-nav-txt);
+  box-shadow: 1px 1px 10px 0.1px rgba(0, 0, 0, 0.3);
+
 }
 
 .mobileNavIcon .line {
@@ -44,8 +49,12 @@ const clicked = mobileIconClicked();
   -o-transition: all 0.3s ease-in-out;
   transition: all 0.3s 0.2s ease-in-out;
 }
+
+mobileNavIcon-wrapper.is-active{
+
+}
 .mobileNavIcon.is-active .line {
-  background-color: var(--color-nav-txt);
+  background-color: var(--color-nav-bg);
 }
 .mobileNavIcon:hover {
   cursor: pointer;

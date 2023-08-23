@@ -4,15 +4,17 @@ import VueCropper from "vue-cropperjs";
 import "cropperjs/dist/cropper.css";
 import { profPicClose } from "../store/profPicClose";
 import { profPicChanged } from "@/store/profPicChanged";
-import firebase from "firebase/compat/app";
+import Modal from "../components/Modal.vue";
+import firebase from 'firebase/compat/app'
+
 import {
   getStorage,
   ref as storageFBRef,
   uploadBytesResumable,
 } from "firebase/storage";
-import Modal from "../components/Modal.vue";
-import db from "../firebase/firebaseInit";
-import { doc, updateDoc } from "firebase/firestore";
+import "firebase/compat/auth";
+
+
 
 const selectedFile = ref();
 const dialog = ref(false);
@@ -20,7 +22,6 @@ const fileUpload = ref();
 const profPicState = profPicClose();
 const cropper = ref() as any;
 const showCropButton = ref(false);
-const uploadProgress = ref();
 
 const modalActivation = ref(false);
 const modalLoadingMessage = ref();
@@ -161,41 +162,44 @@ const UploadImage = async () => {
       }
       console.log(picChanged.state);
 
-      modalAnimation.value = false;
-      setTimeout(() => {
-        modalLoadingMessage.value = "Uploaded!";
-      }, 300);
 
-      setTimeout(() => {
-        modalActivation.value = false;
-      }, 1500);
-    }
-  );
-console.log(destination.value)
-var docRef = firebase.firestore().collection("users").doc(firebase.auth().currentUser!.uid);
+      let promise = new Promise(function (resolve, reject) {
+        setTimeout(() => {
+          resolve(modalAnimation.value = false
+          )
+          resolve(modalLoadingMessage.value = "Uploaded!")
+        }, 1000)
+      })
 
-docRef.update({profilePic: destination.value})
+      promise.then(function () {
+        setTimeout(() => {
+          modalActivation.value = false;
+
+        }, 1000);
+      });
+
+    });
 
 
+
+
+
+
+  console.log(destination.value)
+  var docRef = firebase.firestore().collection("users").doc(firebase.auth().currentUser!.uid);
+
+  docRef.update({ profilePic: destination.value })
 };
 </script>
 
 <template>
   <div class="editingPanel-wrapper">
     <transition name="modal">
-      <Modal
-        class="modal"
-        v-if="modalActivation"
-        :modalLoadingMessage="modalLoadingMessage"
-        :modalAnimation="modalAnimation"
-      />
+      <Modal class="modal" v-if="modalActivation" :modalLoadingMessage="modalLoadingMessage"
+        :modalAnimation="modalAnimation" :position="'absolute'" :spinnerColor="'var(--color-nav-txt)'" />
     </transition>
-    <input
-      class="backButton"
-      type="button"
-      @click="closePicPanel"
-      value="Back"
-    />
+
+    <input class="backButton" type="button" @click="closePicPanel" value="Back" />
 
     <div class="current">
       <label for="current">Current</label>
@@ -203,53 +207,20 @@ docRef.update({profilePic: destination.value})
     </div>
 
     <div class="editingPanel">
-      <VueCropper
-        ref="cropper"
-        :src="selectedFile"
-        :img-style="{ width: '128px', height: '128px' }"
-        :zoomOnWheel="true"
-        :aspect-ratio="1"
-        :autoCropArea="1"
-        :viewMode="3"
-        :cropBoxMoveable="false"
-        :cropBoxResizable="false"
-        :toggleDragModeOnDblclick="false"
-        :autoCrop="true"
-        v-if="selectedFile && !destination"
-      ></VueCropper>
-      <input
-        v-if="showCropButton"
-        type="button"
-        value="Crop"
-        @click="handleCropped"
-      />
+      <VueCropper ref="cropper" :src="selectedFile" :img-style="{ width: '128px', height: '128px' }" :zoomOnWheel="true"
+        :aspect-ratio="1" :autoCropArea="1" :viewMode="3" :cropBoxMoveable="false" :cropBoxResizable="false"
+        :toggleDragModeOnDblclick="false" :autoCrop="true" v-if="selectedFile && !destination"></VueCropper>
+      <input v-if="showCropButton" type="button" value="Crop" @click="handleCropped" />
       <div class="preview" v-if="destination">
         <label for="">New</label>
         <img v-bind:src="destination" alt="" />
       </div>
     </div>
     <div class="btns">
-      <input
-        type="button"
-        @click="fileUpload.click()"
-        class="custom-file-upload"
-        value="Select image"
-      />
+      <input type="button" @click="fileUpload.click()" class="custom-file-upload" value="Select image" />
 
-      <input
-        type="file"
-        name=""
-        ref="fileUpload"
-        id="file-upload"
-        @change="onFileSelect"
-        style="display: none"
-      />
-      <input
-        type="button"
-        value="Upload"
-        v-if="destination"
-        @click="UploadImage"
-      />
+      <input type="file" name="" ref="fileUpload" id="file-upload" @change="onFileSelect" style="display: none" />
+      <input type="button" value="Upload" v-if="destination" @click="UploadImage" />
     </div>
   </div>
 </template>
@@ -258,8 +229,11 @@ docRef.update({profilePic: destination.value})
 .editingPanel-wrapper {
   padding: 20px;
   position: absolute;
-  height: 80%;
-  align-self: center;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
   border-radius: 30px;
   background-color: var(--color-nav-bg);
   z-index: 10;
@@ -278,6 +252,7 @@ docRef.update({profilePic: destination.value})
     img {
       width: 128px;
     }
+
     label {
       position: absolute;
       top: -30px;
@@ -286,6 +261,7 @@ docRef.update({profilePic: destination.value})
       justify-content: center;
     }
   }
+
   .backButton {
     position: absolute;
     top: 0;
@@ -304,6 +280,7 @@ docRef.update({profilePic: destination.value})
     box-shadow: 2px 2px 5px 1px rgba(0, 0, 0, 0.3);
     background-color: var(--color-nav-bg);
   }
+
   input[type="button"]:hover {
     color: var(--color-nav-bg) !important;
     background-color: var(--color-nav-txt);
@@ -317,6 +294,7 @@ docRef.update({profilePic: destination.value})
     justify-content: center;
     align-items: center;
     height: 150px;
+
     input[type="button"] {
       position: absolute;
       bottom: -60px;
@@ -327,15 +305,18 @@ docRef.update({profilePic: destination.value})
       display: flex;
       flex-direction: column;
       align-items: center;
+
       label {
         position: absolute;
         top: -30px;
       }
+
       img {
         width: 128px;
       }
     }
   }
+
   .btns {
     position: relative;
     display: flex;
@@ -343,9 +324,11 @@ docRef.update({profilePic: destination.value})
     gap: 20px;
   }
 }
+
 .modal {
   position: absolute;
 }
+
 .modal-enter-active,
 .modal-leave-active {
   transition: all 0.3s ease-out;

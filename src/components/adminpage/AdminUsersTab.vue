@@ -1,41 +1,44 @@
 <script setup lang="ts">
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, watch, computed } from "vue";
 import {
   collection,
-  getCountFromServer,
-  doc,
-  getDoc,
-  query,
+  getCountFromServer
 } from "firebase/firestore";
-import db from "../firebase/firebaseInit";
+import db from "@/firebase/firebaseInit";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import moment from "moment";
 import Users from "@/components/icons/users-multiple.vue";
 import $ from "jquery";
+import DeleteIcon from "@/components/icons/delete.vue"
 
 const usersRef = collection(db, "users");
 const usersArray = ref([]) as any;
 const userCount = ref();
 
 const isLoadingCount = ref(true);
-const createdAt = ref() as any;
 const isActive = ref();
-const item = ref([]) as any;
 const lastRegistered = ref([]) as any;
 
 const usersArray2 = ref([]) as any;
 
 const colRef = firebase.firestore().collection("users");
 
-const isAnim = ref();
-const isPseudo = ref();
-
 const usersWrap = ref();
 
-const pseudoDiv = ref(false);
+const props = defineProps({
+  usersClicked: Boolean,
+  isAdminCheck: String,
 
-const emit = defineEmits(["editPressed"]);
+})
+
+const usersClickedIn = computed(() => props.usersClicked)
+
+
+
+watch(() => props.usersClicked, () => {
+  console.log(usersClickedIn.value)
+})
 
 const lastRegisteredLoaded = ref(false);
 
@@ -44,7 +47,6 @@ const getUsers = () => {
     querySnapshot.forEach((user) => {
       var check = user.data();
       usersArray2.value.push(check);
-      console.log(usersArray2.value);
     });
   });
 };
@@ -66,7 +68,6 @@ onBeforeMount(async () => {
             if (+current.createdAt > +prev.createdAt) {
               return current;
             } else {
-              console.log(lastRegistered.value);
               return prev;
             }
           });
@@ -89,22 +90,12 @@ onBeforeMount(async () => {
   });
 });
 
-function editUsers() {
-  isActive.value = !isActive.value;
-  // pseudoDiv.value = !pseudoDiv.value;
-  // isPseudo.value = true;
 
-  // if (!pseudoDiv.value) {
-  //   isPseudo.value = false;
-  //   isAnim.value = true;
-  //   setTimeout(() => {
-  //     isAnim.value = false;
-  //   }, 300);
-  // } else {
-  // }
 
-  emit("editPressed", isActive.value);
+const deleteUser = () => {
+
 }
+
 </script>
 
 <template>
@@ -113,7 +104,6 @@ function editUsers() {
     <div class="users-wrapper" ref="usersWrap">
       <div class="label">
         <Users class="usersIcon" />
-        <input type="button" class="button" value="Edit" @click="editUsers" />
       </div>
 
       <div class="inner">
@@ -134,9 +124,10 @@ function editUsers() {
               <li>Email</li>
               <li>Registered</li>
               <li>Profile Picture</li>
+              <li>Delete User</li>
             </ul>
-            <div class="user-list" v-for="users in usersArray2">
-              <div class="user-list-container">
+            <div class="user-list-overflow">
+              <div class="user-list" v-for="users in usersArray2">
                 <div class="name">
                   {{ users.firstName }} {{ users.lastName }}
                 </div>
@@ -148,10 +139,7 @@ function editUsers() {
                 </div>
 
                 <div class="email">{{ users.email }}</div>
-                <div
-                  class="registered-date"
-                  v-if="users.createdAt !== undefined"
-                >
+                <div class="registered-date" v-if="users.createdAt !== undefined">
                   {{
                     moment(new Date(users.createdAt.toDate())).format(
                       "MMM DD, YYYY - HH:mm"
@@ -162,16 +150,19 @@ function editUsers() {
                 <div class="img-wrapper">
                   <img v-bind:src="users.profilePic" />
                 </div>
+                <div class="delete-wrapper">
+                  <DeleteIcon @click="deleteUser" />
+                </div>
               </div>
             </div>
           </div>
         </TransitionGroup>
-        <div class="last-registered-wrapper" key="1">
+        <div class="last-registered-wrapper" key="1" v-if="!isActive">
           <div class="last-registered">
             <transition name="skeleton" v-if="!lastRegisteredLoaded">
               <div class="skeleton"></div>
             </transition>
-            <TransitionGroup name="user-list">
+            <TransitionGroup>
               <div class="text" v-show="lastRegisteredLoaded" key="2">
                 <label>Last Registered</label>
                 <p>
@@ -199,6 +190,10 @@ function editUsers() {
 <style lang="scss" scoped>
 .adminusers-container {
   position: relative;
+  width: 450px;
+  height: 300px;
+  border-radius: 20px;
+  overflow-y: hidden;
 }
 
 .pseudo-div {
@@ -212,19 +207,17 @@ function editUsers() {
   position: relative;
   height: 100%;
   width: 100%;
+  display: flex;
   flex-direction: column;
   background: var(--color-nav-bg);
   color: var(--color-nav-txt);
   font-size: 1rem;
-  display: flex;
-  flex-direction: column;
   font-family: Roboto Condensed;
   font-weight: 800;
-  border-radius: 20px;
-  overflow: hidden;
+
   .label {
     position: relative;
-    height: 100px;
+    height: 90px;
     padding: 20px;
     color: var(--color-nav-bg);
     background-color: rgb(4, 123, 192);
@@ -237,6 +230,7 @@ function editUsers() {
       height: 100%;
       fill: white;
     }
+
     .button {
       position: relative;
       right: 0;
@@ -256,10 +250,13 @@ function editUsers() {
       background-color: var(--color-nav-bg);
       transition: all 0.2s ease-in-out;
     }
+
     .button:hover {
       color: var(--color-nav-bg);
-      background-color: var(--color-nav-txt);
+      background-color: rgb(41, 128, 155);
+      ;
     }
+
     .button:active {
       box-shadow: -1px -1px 1px 0.5px rgba(0, 0, 0, 0.3);
     }
@@ -269,14 +266,16 @@ function editUsers() {
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 80%;
     width: 100%;
     justify-content: space-between;
+
     .text-count {
       position: relative;
       width: 100%;
       height: 100%;
       padding: 10px;
+
       .text-count-inner {
         position: relative;
         width: 100%;
@@ -298,50 +297,89 @@ function editUsers() {
       flex-direction: column;
       gap: 10px;
       padding: 20px;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
+
       .user-list-top {
+        position: relative;
+        width: 100%;
+        padding-right: 30px;
+
         text-decoration: none;
         list-style-type: none;
         display: flex;
-        gap: 50px;
-        padding-left: 0;
+        padding-left: 7px;
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
         grid-template-rows: 1fr;
         gap: 0px 0px;
-        font-size: 2rem;
+        font-size: 1.7rem;
+
+        li:last-child {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
       }
-      .user-list {
+
+      .user-list-overflow::-webkit-scrollbar {
+        width: 12px;
+
+      }
+
+      .user-list-overflow::-webkit-scrollbar-thumb {
+        left: 30px;
+        border-radius: 10px;
+        background: var(--color-nav-txt);
+        cursor: pointer;
+
+      }
+
+      .user-list-overflow {
         position: relative;
-        width: 100%;
-        height: 80px;
-        padding: 10px;
         display: flex;
-        align-items: center;
-        background-color: var(--color-nav-txt);
-        border-radius: 5px;
-        color: var(--color-nav-bg);
-        .user-list-container {
+        flex-direction: row;
+        padding-right: 30px;
+        flex-wrap: wrap;
+        gap: 10px;
+        overflow-y: auto;
+
+        .user-list {
           position: relative;
           width: 100%;
+          height: 100px;
+          align-items: center;
+          background-color: var(--color-nav-txt);
+          border-radius: 5px;
+          color: var(--color-nav-bg);
           display: grid;
-          grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+          grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
           grid-template-rows: 1fr;
+          padding: 5px;
+
           div {
+            height: 100%;
             display: flex;
             align-items: center;
           }
+
           .rights {
+            position: relative;
             width: 100px;
 
-            div {
-              padding: 10px;
-            }
             .admin {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              width: 100px;
               background-color: rgb(143, 140, 0);
               border-radius: 6px;
             }
+
             .regular {
+              width: 100px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
               background-color: rgb(0, 143, 43);
               border-radius: 6px;
             }
@@ -349,27 +387,62 @@ function editUsers() {
 
           .img-wrapper {
             position: relative;
-            height: 100%;
-            width: 100%;
+            height: 40px;
+            width: auto;
+            display: flex;
+
+
             img {
+              position: relative;
+              height: 100%;
+              width: auto;
               margin-left: 30px;
-              height: 60px;
-              display: flex;
-              justify-content: center;
+            }
+
+          }
+
+          .delete-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+
+            svg :deep(.delete-1) {
+              fill: #fff;
+              stroke-miterlimit: 10;
+              stroke-width: 16px;
+            }
+
+            svg :deep(.delete-2) {
+              fill: var(--color-nav-txt);
+            }
+
+            svg {
+              height: 50px;
+              fill: white;
+              transition: all 0.04s ease-in-out;
+              cursor: pointer;
+
+              &:hover {
+                transform: scale(1.2)
+              }
             }
           }
         }
       }
+
     }
+
     .last-registered-wrapper {
       position: relative;
       width: 100%;
       height: 100%;
       padding: 10px;
     }
+
     .last-registered {
       position: relative;
       height: 100%;
+
       .text {
         position: relative;
         font-size: 1rem;
@@ -379,6 +452,7 @@ function editUsers() {
         background-color: rgb(4, 123, 192);
         border-radius: 10px;
         overflow: hidden;
+
         label {
           color: var(--color-nav-bg);
           padding: 3px;
@@ -386,12 +460,14 @@ function editUsers() {
           background-color: #008ca5;
           padding-left: 10px;
         }
+
         p {
           padding: 5px;
           margin-left: 10px;
         }
       }
     }
+
     .skeleton {
       position: absolute;
       top: 0;
@@ -400,13 +476,10 @@ function editUsers() {
       width: 100%;
       height: 100%;
       border-radius: 7px;
-      background: linear-gradient(
-          100deg,
+      background: linear-gradient(100deg,
           rgba(255, 255, 255, 0) 40%,
           rgba(255, 255, 255, 0.384) 50%,
-          rgba(255, 255, 255, 0) 60%
-        )
-        #c7c7c7;
+          rgba(255, 255, 255, 0) 60%) #c7c7c7;
       background-size: 200% 100%;
       background-position-x: 180%;
       animation: 0.8s loading ease-in-out infinite;

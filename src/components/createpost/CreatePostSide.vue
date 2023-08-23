@@ -1,22 +1,21 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import firebase from "firebase/compat/app";
-import VueCropper from "vue-cropperjs";
 import "cropperjs/dist/cropper.css";
-import db from "../firebase/firebaseInit";
+
+import db from "@/firebase/firebaseInit";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import "@/assets/vuepic.scss";
 import Modal from "@/components/Modal.vue";
-import { updateCurrentUser } from "firebase/auth";
-import AskExcerpt from "@/components/CreatePostAskExcerpt.vue";
-import { Timestamp } from "firebase/firestore";
+import AskExcerpt from "@/components/createpost/CreatePostAskExcerpt.vue";
+
 
 const props = defineProps({
   postTitle: String,
   postContent: String,
   postAuthor: String,
   postExcerpt: String,
-  postDate: Timestamp,
+  postDate: String,
   checkSavedPost: Boolean,
   rawImg: String,
   postID: String,
@@ -37,9 +36,6 @@ const saveShow = ref();
 const date = ref() as any;
 
 
-const checkauth = () => {
-  
-};
 
 const postDate = ref();
 
@@ -61,14 +57,16 @@ watch(
   }
 );
 
-watch(
-  () => props.postDate,
-  (newValue) => {
-    postDate.value = props.postDate;
-    date.value = new Date(props.postDate!.toDate());
-  }
-);
+
 date.value = new Date();
+postDate.value = date.value.toString()
+emit("postDate", postDate.value)
+
+watch(date, (newValue) => {
+  postDate.value = newValue.toString()
+  emit("postDate", postDate.value)
+
+})
 const showPreview = () => {
   emit("showPreview", true);
 };
@@ -241,7 +239,13 @@ const modalClickAway = () => {
 
 const countExcerpt = () => {
   var maxlength = 70;
-  var currentLength = excerpt.value.length;
+
+  if (excerpt.value !== null) {
+    var currentLength = excerpt.value.length;
+  } else {
+    currentLength = 0;
+
+  }
 
   if (currentLength >= maxlength) {
     characterCounter.value = "0 characters left";
@@ -272,6 +276,8 @@ const savePost = () => {
       postContent: props.postContent || null,
       postExcerpt: excerpt.value || null,
       coverImage: rawImg.value || null,
+      postCategory: props.postCategory || null,
+      postSection: props.postSection || null,
     };
     dataBase
       .update({
@@ -433,7 +439,6 @@ watch(checkSavedPost, () => {
 
         .then(() => {
           savedPost.value = userData.value.savedPost;
-
           if (
             Object.keys(savedPost.value).length !== 0 ||
             Object.keys(savedPost.value) !== null
@@ -524,115 +529,65 @@ const autoFillExcerpt = () => {
   var strippedHtml = postContent.value!.replace(/<[^>]+>/g, "");
   excerpt.value = strippedHtml.slice(0, 70);
 };
-onMounted(() => {});
+onMounted(() => { });
 </script>
 
 <template>
   <transition name="modal">
-    <AskExcerpt
-      v-if="excerptDialogue"
-      class="askexcerpt"
-      @button-no="excerptNo"
-      @button-yes="excerptYes"
-    />
+    <AskExcerpt v-if="excerptDialogue" class="askexcerpt" @button-no="excerptNo" @button-yes="excerptYes" />
   </transition>
   <transition name="modal">
-    <Modal
-      class="modal"
-      v-if="modalActive"
-      :modalAnimation="modalAnimation"
-      :modalLoadingMessage="modalLoadingMessage"
-      v-click-away="modalClickAway"
-    />
+    <Modal class="modal" v-if="modalActive" :modalAnimation="modalAnimation" :modalLoadingMessage="modalLoadingMessage"
+      :position="'absolute'" :spinnerColor="'var(--color-nav-txt)'" v-click-away="modalClickAway" />
   </transition>
 
   <div class="side-container">
-    <div class="date-picker">
-      <div class="author-wrapper">
-        <label class="label">Writing as:</label>
-        <label class="author"> {{ props.postAuthor }}</label>
-      </div>
-      <label class="date">Post Date</label>
-      <VueDatePicker
-        @update:model-value="saveDateButton"
-        ref="datePicker"
-        v-model="date"
-        auto-apply
-        hide-input-icon
-        show-now-button
-        :month-change-on-scroll="true"
-        :close-on-auto-apply="true"
-        :close-on-clear-value="false"
-        :min-date="new Date()"
-      >
-      </VueDatePicker>
-    </div>
-    <div class="cover-photo">
+
+    <div class="cover-photo wrapper">
       <label>Cover Photo</label>
       <div class="cover-preview-wrapper" value="Preview Cover" key="1">
         <div class="cover-image-wrapper">
           <img :src="rawImg" alt="" key="2" v-if="showCoverPreview" />
         </div>
-        <div
-          v-if="showCoverPreview"
-          type="button"
-          class="btn-close"
-          @click.prevent="btnClose"
-        />
+        <div v-if="showCoverPreview" type="button" class="btn-close" @click.prevent="btnClose" />
         <span class="icon-cross"></span>
         <span class="visually-hidden"></span>
       </div>
-      <input
-        type="button"
-        @click="fileUpload.click()"
-        class="custom-file-upload"
-        value="Select Image"
-      />
+      <input type="button" @click="fileUpload.click()" class="custom-file-upload" value="Select Image" />
 
-      <input
-        type="file"
-        @change="onFileSelect"
-        @click="onFileClick"
-        name=""
-        ref="fileUpload"
-        id="file-upload"
-        style="display: none"
-      />
+      <input type="file" @change="onFileSelect" @click="onFileClick" name="" ref="fileUpload" id="file-upload"
+        style="display: none" />
     </div>
-    <div class="excerpt-wrapper">
+    <div class="date-picker wrapper">
+      <div class="author-wrapper">
+        <label class="label">Writing as:</label>
+        <label class="author"> {{ props.postAuthor }}</label>
+      </div>
+      <label class="date">Post Date</label>
+      <VueDatePicker @update:model-value="saveDateButton" ref="datePicker" v-model="date" auto-apply hide-input-icon
+        show-now-button :month-change-on-scroll="true" :close-on-auto-apply="true" :close-on-clear-value="false"
+        :min-date="new Date()">
+      </VueDatePicker>
+    </div>
+    <div class="excerpt-wrapper wrapper">
       <label>Excerpt</label>
-      <textarea
-        type="text"
-        class="excerpt-textarea"
-        v-model="excerpt"
-        maxlength="70"
-        ref="excerptText"
-        @input="handler"
-      />
+      <textarea type="text" class="excerpt-textarea" v-model="excerpt" maxlength="70" ref="excerptText"
+        @input="handler" />
 
       <div class="excerpt-counter">
         <div class="autofill-hover" v-if="autoFill">
           This will make the excerpt filled out with text from the editor to the
           left
         </div>
-        <div
-          ref="characterCounterRef"
-          v-text="characterCounter"
-          class="character-counter"
-        />
-        <input @click="checkauth" type="button" value="hello" />
+        <div ref="characterCounterRef" v-text="characterCounter" class="character-counter" />
 
-        <input
-          type="button"
-          value="AutoFill"
-          @click="autoFillExcerpt"
-          @mouseover="autoFillHover"
-          @mouseleave="autoFillLeave"
-        />
+        <input type="button" value="AutoFill" @click="autoFillExcerpt" @mouseover="autoFillHover"
+          @mouseleave="autoFillLeave" />
       </div>
     </div>
 
-    <div class="btns">
+
+    <div class="btns wrapper">
       <transition name="save">
         <div class="button-save" v-if="saveShow">
           <input type="button" value="Save" @click="savePost" />
@@ -658,6 +613,7 @@ onMounted(() => {});
   background: var(--color-nav-bg);
   cursor: pointer;
 }
+
 .askexcerpt {
   position: absolute;
   top: 0;
@@ -669,6 +625,7 @@ onMounted(() => {});
   align-items: center;
   justify-content: center;
 }
+
 .modal {
   top: 0;
   bottom: 0;
@@ -695,13 +652,22 @@ onMounted(() => {});
   background-color: var(--color-nav-bg);
   transition: all 0.15s ease-in-out;
 }
+
 .side-container input[type="button"]:hover {
   color: var(--color-nav-bg) !important;
   background-color: var(--color-nav-txt);
 }
+
 .side-container input[type="button"]:active {
   box-shadow: -1px -1px 1px 0.5px rgba(0, 0, 0, 0.3);
 }
+
+label {
+  width: 100%;
+  left: 0;
+  margin-bottom: 10px;
+}
+
 .side-container {
   position: relative;
   height: 100%;
@@ -725,26 +691,28 @@ onMounted(() => {});
     flex-direction: column;
     color: var(--color-nav-txt);
     gap: 3px;
+
     .date {
       width: 100%;
       margin: 0;
       left: 0;
     }
+
     .author-wrapper {
       font-family: Roboto Condensed;
       font-weight: 700;
       margin-bottom: 10px;
       display: flex;
-      .label {
-        width: 100%;
-        left: 0;
-      }
+
+
+
       .author {
         width: 100%;
         text-align: right;
       }
     }
   }
+
   .excerpt-wrapper {
     height: 100%;
     width: 100%;
@@ -753,10 +721,8 @@ onMounted(() => {});
     justify-content: center;
     align-items: center;
 
-    label {
-      margin-bottom: 5px;
-      width: 100%;
-    }
+
+
     textarea {
       width: 100%;
       font-family: Roboto Condensed;
@@ -771,12 +737,15 @@ onMounted(() => {});
       resize: none;
       padding: 10px;
     }
+
     textarea:focus-visible {
       outline: var(--color-nav-txt);
     }
-    textarea > div > div:last-child {
+
+    textarea>div>div:last-child {
       scroll-snap-align: end;
     }
+
     .excerpt-counter {
       margin-top: 10px;
       width: 100%;
@@ -816,20 +785,23 @@ onMounted(() => {});
       }
     }
   }
+
   .cover-photo {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    gap: 10px;
     width: 100%;
     height: 100%;
+
     .cover-preview-wrapper {
       position: relative;
       display: flex;
       align-items: center;
       width: 100%;
+      margin-bottom: 5px;
+
       .btn-close {
         position: absolute;
         border: 0;
@@ -848,6 +820,7 @@ onMounted(() => {});
         &:hover {
           box-shadow: 0px 0px 0px 8px rgba(0, 0, 0, 0.5);
         }
+
         &:focus {
           box-shadow: -0px -0px 0px 0.5px rgba(0, 0, 0, 0.3);
         }
@@ -865,9 +838,11 @@ onMounted(() => {});
         transform-origin: top left;
         content: "";
       }
+
       .btn-close:after {
         transform: rotate(-45deg) translate(-50%, -50%);
       }
+
       .btn-close:after:hover {
         transform: rotate(-90deg) translate(-50%, -50%);
       }
@@ -887,6 +862,7 @@ onMounted(() => {});
       }
     }
   }
+
   .btns {
     height: 100%;
     width: 100%;
@@ -894,23 +870,28 @@ onMounted(() => {});
     flex-direction: column;
     justify-content: flex-end;
     gap: 10px;
+
     .button-upload {
       input {
         font-size: 2rem;
         background-color: var(--color-nav-txt) !important;
         color: var(--color-nav-bg) !important;
       }
+
       input:hover {
         background-color: var(--color-nav-bg) !important;
         color: var(--color-nav-txt) !important;
       }
     }
+
     .button-save {
       transition: opacity 0.4s ease-in-out;
+
       input {
         background-color: red;
         color: var(--color-nav-bg) !important;
       }
+
       input:hover {
         background: rgba(114, 2, 2, 0.8) !important;
       }
@@ -929,6 +910,7 @@ onMounted(() => {});
   transition: all 0.4s ease-out;
   opacity: 0;
 }
+
 .modal-enter-active,
 .modal-leave-active {
   transition: all 0.3s ease-out;
@@ -938,5 +920,68 @@ onMounted(() => {});
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
+}
+
+@media (max-height: 768px) {
+  .side-container .btns .button-upload input {
+    height: 30px;
+    font-size: 1rem;
+  }
+
+  .side-container input[type=button] {
+    height: 30px;
+    padding: 3px;
+  }
+
+  .side-container .cover-photo .cover-preview-wrapper .cover-image-wrapper {
+    height: 40px;
+    padding: 3px;
+  }
+
+  .side-container .excerpt-wrapper textarea {
+    height: 50px;
+  }
+
+  label {
+    font-size: 0.8rem;
+    margin-bottom: 3px;
+  }
+}
+
+@media (max-height: 550px) {
+  .side-container {
+    width: 400px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0px;
+
+    .wrapper {
+      padding: 10px;
+      position: relative;
+      display: flex;
+      height: 100%;
+      width: 100%;
+    }
+    .wrapper:nth-child(2){
+      bottom: 0;
+      margin:auto;
+    }
+  }
+  .side-container .cover-photo .cover-preview-wrapper .cover-image-wrapper {
+    height: 100px;
+    padding: 3px;
+  }
+  .side-container .excerpt-wrapper textarea {
+    height: 100px;
+  }
+  .side-container input[type=button] {
+    height: 50px;
+    padding: 3px;
+  }
+  .side-container .btns .button-upload input {
+    height: 50px;
+    font-size: 1rem;
+  }
 }
 </style>

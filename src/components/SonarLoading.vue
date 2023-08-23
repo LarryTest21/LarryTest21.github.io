@@ -6,24 +6,11 @@ const props = defineProps({
   background: Boolean,
 });
 
-const loadingRef = ref();
 const wrapper = ref()
-
-
-watch(
-  () => props.loading,
-  () => {
-    
-    console.log(props.loading)
-    loadingRef.value = props.loading
-
-  }
-);
 
 watch(
   () => props.background,
   () => {
-    console.log(props.background)
 if (props.background === true) {
 wrapper.value.classList.add("background-on")
 } if (props.background === false)
@@ -35,7 +22,7 @@ wrapper.value.classList.remove("background-on")
 
 <template>
   <div class="posts-loading" ref="wrapper">
-    <div class="spinner" v-if="loadingRef"></div>
+    <div class="spinner" v-if="props.loading"></div>
   </div>
 </template>
 

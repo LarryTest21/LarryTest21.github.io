@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { modalActive } from "../store/modalActive";
 import { modalButtonActive } from "../store/modalButtonActive";
+
 import { FieldValue } from "firebase/firestore";
 
 const props = defineProps({
@@ -12,7 +13,8 @@ const props = defineProps({
   modalButtonMessage: String,
   backgroundOpacity: Number,
   spinnerColor: String,
-  position: String
+  position: String,
+  fontSize: String
 });
 
 const closeModal = () => {
@@ -32,11 +34,7 @@ const modalButton = modalButtonActive();
         <p class="modal-message" key="lorem2" v-if="modalLoadingMessage">
           {{ props.modalLoadingMessage }}
         </p>
-        <div
-          class="modal-loading"
-          key="lorem2"
-          v-show="!modalButtonShow && modalAnimation"
-        >
+        <div class="modal-loading" key="lorem2" v-show="!modalButtonShow && modalAnimation">
           <span class="loader"></span>
 
           <div class="lds-roller" key="lorem3">
@@ -82,21 +80,21 @@ const modalButton = modalButtonActive();
   align-items: center;
   z-index: -1;
 }
+
 .modal {
+  position: v-bind(position);
   width: 100%;
   height: 100%;
-  top: 0;
-  position: v-bind(position);
-  display: flex;
   justify-content: center;
   align-items: center;
   color: var(--color-nav-txt) !important;
   display: flex;
   flex-direction: column;
   z-index: 70;
-  left: 0;
-  font-size: 3rem;
-  border-radius: 30px;
+  font-size: v-bind(fontSize);
+
+
+
   .modal-message {
     position: relative;
     height: 100%;
@@ -107,6 +105,7 @@ const modalButton = modalButtonActive();
     justify-content: center;
     align-items: center;
   }
+
   .modal-content {
     width: 100%;
     text-align: center;
@@ -118,13 +117,14 @@ const modalButton = modalButtonActive();
       margin: 0;
     }
   }
+
   .modal-loading {
+    position: relative;
     width: 100%;
     height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-radius: 30px;
   }
 
   .loader {
@@ -133,12 +133,12 @@ const modalButton = modalButtonActive();
     height: 48px;
     border-width: 3px;
     border-style: dashed solid solid dotted;
-    border-color:  v-bind(spinnerColor) v-bind(spinnerColor) transparent  v-bind(spinnerColor) 
-    ;
+    border-color: v-bind(spinnerColor) v-bind(spinnerColor) transparent v-bind(spinnerColor);
     border-radius: 50%;
     box-sizing: border-box;
     animation: rotation 1.5s linear infinite;
   }
+
   .loader::after {
     content: "";
     box-sizing: border-box;
@@ -155,15 +155,19 @@ const modalButton = modalButtonActive();
       transform: rotate(0deg);
       opacity: 0;
     }
+
     25% {
       opacity: 1;
     }
+
     50% {
       opacity: 1;
     }
+
     75% {
       opacity: 1;
     }
+
     100% {
       transform: rotate(360deg);
       opacity: 0;
@@ -259,6 +263,7 @@ const modalButton = modalButtonActive();
 
   .modal-button {
     width: 100%;
+
     .modal-content {
       display: flex;
       flex-direction: column;
@@ -273,6 +278,7 @@ const modalButton = modalButtonActive();
         color: var(--color-nav-txt);
         font-size: 1.4rem;
       }
+
       button {
         width: 80%;
         font-family: Chango;
@@ -287,10 +293,12 @@ const modalButton = modalButtonActive();
         background-color: var(--color-nav-bg);
         transition: all 0.1s ease-in-out;
       }
+
       button:hover {
         color: var(--color-nav-bg) !important;
         background-color: var(--color-nav-txt);
       }
+
       button:active {
         box-shadow: -1px -1px 1px 0.5px rgba(0, 0, 0, 0.3);
       }
@@ -307,5 +315,4 @@ const modalButton = modalButtonActive();
   .fade-leave-to {
     opacity: 0;
   }
-}
-</style>
+}</style>

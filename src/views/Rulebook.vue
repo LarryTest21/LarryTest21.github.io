@@ -1,3 +1,8 @@
+<script setup lang="ts">
+
+</script>
+
+
 <template>
     <div class="rulebook">
       <h1>This is a rulebook page</h1>

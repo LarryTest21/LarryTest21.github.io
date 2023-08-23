@@ -9,7 +9,9 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["node"]
+    "types": ["node", "gapi", "gapi.auth2"],
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+
   },
 
   "references": [

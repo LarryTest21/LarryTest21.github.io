@@ -6,7 +6,7 @@ import Modal from "../components/Modal.vue";
 import { modalButtonActive } from "../store/modalButtonActive";
 import { modalActive } from "../store/modalActive";
 import { signedIn } from "../store/signedIn";
-import { userClicked } from "@/store/userClicked";
+import { userTabClick } from "@/store/userTabClick";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import db from "../firebase/firebaseInit";
@@ -67,33 +67,19 @@ const signIn = () => {
 <template>
   <div class="mobile-login-wrap">
     <transition name="modal">
-      <Modal
-        v-if="modalActivation.state"
-        :modalButtonShow="modalButtonShow"
-        :modalButtonMessage="modalButtonMessage"
-        :modalAnimation="modalAnimation"
-      />
+      <Modal v-if="modalActivation.state" :modalButtonShow="modalButtonShow" :modalButtonMessage="modalButtonMessage"
+        :modalAnimation="modalAnimation" />
     </transition>
 
     <div class="inputs">
       <div class="login-input">
         <div class="input">
-          <input
-            type="text"
-            placeholder="Email"
-            v-model="email"
-            @keyup.enter.native="signIn"
-          />
+          <input type="text" placeholder="Email" v-model="email" @keyup.enter.native="signIn" />
           <emailSVG class="icon" />
         </div>
 
         <div class="input">
-          <input
-            type="password"
-            placeholder="Password"
-            v-model="password"
-            @keyup.enter.native="signIn"
-          />
+          <input type="password" placeholder="Password" v-model="password" @keyup.enter.native="signIn" />
           <passwordSVG class="icon" />
         </div>
       </div>
@@ -129,11 +115,12 @@ const signIn = () => {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    
+
     .login-input {
       height: 100%;
       display: flex;
       flex-direction: column;
+
       .input {
         height: 100%;
         border-color: var(--vt-c-nav-text-bg-hover);
@@ -144,6 +131,7 @@ const signIn = () => {
         display: flex;
         align-items: center;
         justify-content: center;
+
         .icon {
           position: absolute;
           left: 0;
@@ -152,6 +140,7 @@ const signIn = () => {
           stroke-width: 2px;
           fill: var(--color-nav-txt);
         }
+
         input {
           font-size: 2rem;
           width: 100%;
@@ -162,6 +151,7 @@ const signIn = () => {
           border-bottom: solid rgba(0, 86, 167, 0.555);
           transition: all 0.1s ease-in-out;
         }
+
         input[type="button"] {
           width: 100%;
         }
@@ -182,6 +172,7 @@ const signIn = () => {
           border-bottom: solid rgba(0, 86, 167, 0.192);
           width: 100%;
         }
+
         input,
         select,
         textarea {
@@ -194,6 +185,7 @@ const signIn = () => {
       color: var(--color-nav-txt);
       font-weight: Light;
     }
+
     input:focus::placeholder {
       color: transparent;
     }
@@ -219,17 +211,20 @@ const signIn = () => {
         background-color: var(--color-nav-bg);
         transition: all 0.1s ease-in-out;
       }
+
       input[type="button"]:hover {
         color: var(--color-nav-bg) !important;
         background-color: var(--color-nav-txt);
       }
+
       input[type="button"]:active {
         box-shadow: -1px -1px 1px 0.5px rgba(0, 0, 0, 0.3);
       }
-a {
-  height: 100%;
-  width: 100%;
-}
+
+      a {
+        height: 100%;
+        width: 100%;
+      }
     }
   }
 }
@@ -245,3 +240,4 @@ a {
   opacity: 0;
 }
 </style>
+@/store/userTabClick

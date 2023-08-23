@@ -2,7 +2,7 @@
 import { RouterView } from "vue-router";
 import { ref, watch, onMounted } from "vue";
 import PreLoader from "@/components/PreLoader.vue";
-import { useLoaderState } from "@/store/isloading";
+import { isLoading } from "@/store/isloading";
 import { useTheme } from "@/store/theme";
 import Nav from "@/components/Nav.vue";
 import MobileNav from "@/components/MobileNav.vue";
@@ -15,7 +15,6 @@ import { isAdmin } from "@/store/isAdmin";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import db from "@/firebase/firebaseInit";
-
 
 
 const mobileNav = ref();
@@ -56,7 +55,7 @@ const currentTheme = useTheme();
 
 const route = useRoute();
 
-const isLoading = useLoaderState();
+const isLoadingCheck = isLoading();
 const mountApp = onMountApp();
 mountApp.state = false;
 
@@ -106,10 +105,14 @@ function moveScrollIndicator(e) {
 }
 
 onMounted(() => {
+
+  watch(() => isLoadingCheck.state, (newValue) => {
+    setTimeout(() => {
+      showNav.value = true;
+    }, 300);
+
+  })
   mountApp.state = true;
-  setTimeout(() => {
-    showNav.value = true;
-  }, 100);
   onResize();
 });
 </script>
@@ -119,13 +122,9 @@ onMounted(() => {
 <template>
   <div id="app" v-if="mountApp" :class="[currentTheme.state, mobileNav]">
     <transition name="nav">
-      <Nav
-        :class="mobileNav"
-        v-if="
-          (showNav && mobileNav === 'medium') ||
-          (showNav && mobileNav === 'full')
-        "
-      />
+      <Nav :class="mobileNav" v-if="(showNav && mobileNav === 'medium') ||
+        (showNav && mobileNav === 'full')
+        " />
     </transition>
     <div ref="scrollIndicator" class="scrollLineTop" id="scrollIndicator"></div>
 
@@ -134,8 +133,8 @@ onMounted(() => {
     </transition>
     <MobileNavIcon v-if="mobileNav === 'mobile'" />
 
-    <transition name="fade">
-      <PreLoader v-if="isLoading.state" :class="[currentTheme.state]" />
+    <transition name="fadeRoute">
+      <PreLoader v-if="isLoadingCheck.state" :class="[currentTheme.state]" />
     </transition>
     <RouterView />
   </div>
@@ -156,26 +155,27 @@ onMounted(() => {
   transition: opacity 0.3s ease-in-out;
 }
 
-.fade-enter-active,
-.fade-leave-active {
+.fadeRoute-enter-active,
+.fadeRoute-leave-active {
   opacity: 1;
   transition: all 0.2s ease-in-out;
 }
 
-.fade-leave-to {
+.fadeRoute-leave-to {
   opacity: 0;
 }
+
 .nav-enter-active,
 .nav-leave-active {
   opacity: 1;
   transform: translateY(0);
-  transition: all 0.4s ease-in-out;
+  transition: all 0.5s ease-in-out;
 }
 
 .nav-enter-from,
 .nav-leave-to {
   opacity: 0;
-  transform: translateY(-200px);
+  transform: translateX(100%);
 }
 
 .mobileNav-enter-active {
@@ -186,6 +186,7 @@ onMounted(() => {
 .mobileNav-enter-from {
   transform: translateX(-400px);
 }
+
 .mobileNav-leave-to {
   opacity: 0;
   transition: all 0.1s ease-in-out;

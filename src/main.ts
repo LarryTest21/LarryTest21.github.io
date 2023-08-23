@@ -1,16 +1,13 @@
-import { ref } from "vue";
 import { createPinia } from "pinia";
 import { createApp } from "vue";
-import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import VueMultiselect from "vue-multiselect";
-
+import LoadScript from "vue-plugin-load-script";
 import App from "./App.vue";
 import router from "./router";
 import VueClickAway from "vue3-click-away";
 
 import "./assets/main.css";
-import { onAuthStateChanged } from "firebase/auth";
 
 import VueGtag from "vue-gtag-next";
 
@@ -24,6 +21,7 @@ app.use(VueGtag, {
 });
 app.component("VueMultiselect", VueMultiselect);
 
+app.use(LoadScript);
 
 
 app.directive("visible", function (el, binding) {

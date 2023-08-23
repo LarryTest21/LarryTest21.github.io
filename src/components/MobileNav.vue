@@ -5,7 +5,7 @@ import { useTheme } from "../store/theme";
 import { modalActive } from "../store/modalActive";
 import { signedIn } from "../store/signedIn";
 import { userClickedMobile } from "@/store/userClickMobile";
-import { userClicked } from "@/store/userClicked";
+import { userTabClick } from "@/store/userTabClick";
 import { userLoginClickMobile } from "@/store/userLoginClickMobile";
 import LoginTabMobile from "@/components/LoginTabMobile.vue";
 import userTabMobile from "@/components/userTabMobile.vue";
@@ -13,8 +13,12 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import $ from "jquery";
 import { mobileIconClicked } from "@/store/mobileIconClicked";
+import { isAdmin } from "@/store/isAdmin";
+import arrowIcon from "@/components/icons/arrow.vue"
 
-const userClick = userClicked();
+const isAdminCheck = isAdmin();
+
+const userClick = userTabClick();
 
 const userTabClicked = userClickedMobile();
 const mobileIClicked = mobileIconClicked();
@@ -127,56 +131,50 @@ onMounted(() => {
         <ul class="nav-links">
           <RouterLink to="/">
             <div class="nav-logo">
-              <img
-                class="logo"
-                src="/src/assets/logos/logo.svg"
-                alt=""
-                @click.native="mobileIClicked.state = false"
-              /></div
-          ></RouterLink>
-          <a
-            class="login"
-            v-if="!signedInCheck.state && loginActivated"
-            @click.native.prevent="userLoginClick.state = !userLoginClick.state"
-            >Login</a
-          >
+              <img class="logo" src="/src/assets/logos/logo.svg" alt="" @click.native="mobileIClicked.state = false" />
+            </div>
+          </RouterLink>
+          <a class="login" v-if="!signedInCheck.state && loginActivated"
+            @click.native.prevent="userLoginClick.state = !userLoginClick.state">Login</a>
           <a class="user-wrapper">
-            <a
-              key="1"
-              v-show="signedInCheck.state"
-              class="user"
-              @click.native.prevent="
-                userTabClicked.state = !userTabClicked.state
-              "
-            >
+            <a key="1" v-show="signedInCheck.state" class="user" @click.native.prevent="
+              userTabClicked.state = !userTabClicked.state
+              ">
               {{ displayName }}
             </a>
+            <div class="arrowIcon" :class="userTabClicked.state ? 'active' : ''">
+              <arrowIcon class=" arrowIcon-icon" />
+
+            </div>
+
           </a>
+
           <div class="links-usertab-login">
             <TransitionGroup name="userTab">
-              <LoginTabMobile
-                v-if="userLoginClick.state && !signedInCheck.state"
-              />
+              <LoginTabMobile v-if="userLoginClick.state && !signedInCheck.state" />
             </TransitionGroup>
             <TransitionGroup name="userTab">
-              <userTabMobile
-                v-if="userClick"
-                @click.native="mobileIClicked.state = false"
-              />
+              <userTabMobile v-if="userClick" @click.native="mobileIClicked.state = false"
+                :isAdminCheck="isAdminCheck.state" />
             </TransitionGroup>
             <TransitionGroup name="userTab">
-              <div
-                class="links"
-                v-if="!userTabClicked.state && !userLoginClick.state"
-                @click.native="mobileIClicked.state = false"
-              >
-                <RouterLink to="/rulebook"><li>Rulebook</li></RouterLink>
-                <RouterLink to="/news"><li>News</li></RouterLink>
-                <RouterLink to="/bsl"><li>BSL</li></RouterLink>
-                <RouterLink to="/custom-teams"
-                  ><li>Custom Teams</li></RouterLink
-                >
-                <RouterLink to="/contact"><li>Contact</li></RouterLink>
+              <div class="links" v-if="!userTabClicked.state && !userLoginClick.state"
+                @click.native="mobileIClicked.state = false">
+                <RouterLink to="/rulebook">
+                  <li>Rulebook</li>
+                </RouterLink>
+                <RouterLink to="/news">
+                  <li>News</li>
+                </RouterLink>
+                <RouterLink to="/bsl">
+                  <li>BSL</li>
+                </RouterLink>
+                <RouterLink to="/custom-teams">
+                  <li>Custom Teams</li>
+                </RouterLink>
+                <RouterLink to="/contact">
+                  <li>Contact</li>
+                </RouterLink>
               </div>
             </TransitionGroup>
           </div>
@@ -184,13 +182,7 @@ onMounted(() => {
 
         <div class="theme-changer-wrapper">
           <label class="theme-changer">
-            <input
-              v-model="theme_checked"
-              type="checkbox"
-              class="button"
-              @click="themechange()"
-              :class="currentTheme"
-            />
+            <input v-model="theme_checked" type="checkbox" class="button" @click="themechange()" :class="currentTheme" />
             <span class="slider round"></span>
           </label>
         </div>
@@ -230,20 +222,24 @@ onMounted(() => {
         flex-direction: column;
         padding: 0 0rem;
         color: var(--color-nav-txt);
+
         a:hover {
           background-color: var(--color-nav-txt);
           color: var(--vt-c-nav-text-hover);
           cursor: pointer;
         }
+
         a::after {
           box-shadow: none;
         }
+
         a {
           text-decoration: none;
           font-size: 2rem;
           text-transform: uppercase;
           font-family: Chango;
           color: var(--color-nav-txt);
+
           li {
             list-style-type: none;
             display: flex;
@@ -252,12 +248,15 @@ onMounted(() => {
             padding: 10px 10px;
           }
         }
+
         a.router-link-exact-active:first-child {
           background-color: transparent;
         }
+
         a.router-link-exact-active:first-child:hover {
           background-color: transparent;
         }
+
         .login {
           padding: 10px;
           color: var(--color-nav-bg);
@@ -275,10 +274,12 @@ onMounted(() => {
             width: 100%;
             display: flex;
             flex-direction: column;
+
             a.router-link-exact-active:first-child {
               background-color: var(--color-nav-txt);
               color: var(--color-nav-bg);
             }
+
             a.router-link-exact-active:first-child:hover {
               background-color: var(--color-nav-txt);
             }
@@ -290,34 +291,75 @@ onMounted(() => {
           display: flex;
           justify-content: center;
           margin: 10px 0;
+
           img {
             height: 20vh;
           }
         }
 
         .user-wrapper {
+          position: relative;
           margin-bottom: 20px;
+          display: flex;
+          width: 100%;
+          background-color: var(--color-nav-txt);
+          align-items: center;
+
           .login {
             height: 100%;
             width: 100%;
             transition: opacity 0.2s;
           }
+
+
+
           .user {
+            position: relative;
+
             display: flex;
             width: 100%;
             padding: 10px;
             color: var(--color-nav-bg);
-            background-color: var(--color-nav-txt);
+          }
+
+          .arrowIcon {
+            height: 40px;
+            fill: var(--color-nav-bg);
+            transition: 0.2s ease-in-out;
+            margin-right: 20px;
+            width: 30px;
+
+
+            .arrowIcon-icon {
+              height: 100%;
+              width: 30px;
+            }
+          }
+
+          .arrowIcon.active {
+            animation: arrowIcon;
+            animation-fill-mode: forwards;
+            animation-duration: 0.3s;
+
+          }
+
+          @keyframes arrowIcon {
+            100% {
+              transform: translate(80px) rotate(90deg);
+            }
+
+
           }
         }
       }
+
       .theme-changer-wrapper {
         position: absolute;
         bottom: 0;
         width: 100%;
         padding: 10px;
         display: flex;
-        justify-content: center;
+        justify-content: flex-end;
         align-items: flex-end;
 
         .theme-changer {
@@ -356,20 +398,22 @@ onMounted(() => {
           transition: 0.4s;
         }
 
-        input:checked + .slider {
+        input:checked+.slider {
           background-color: rgb(235, 235, 235);
         }
-        input:checked + .slider:before {
+
+        input:checked+.slider:before {
           background-color: rgba(0, 54, 107, 1);
         }
 
-        input:focus + .slider {
+        input:focus+.slider {
           box-shadow: 0 0 1px rgb(1, 67, 131);
         }
 
-        input:checked + .slider:before {
+        input:checked+.slider:before {
           transform: translateX(26px);
         }
+
         /* Rounded sliders */
         .slider.round {
           border-radius: 34px;
@@ -381,6 +425,7 @@ onMounted(() => {
       }
     }
   }
+
   .wrapper::before {
     opacity: 0.95;
     position: absolute;
@@ -405,3 +450,4 @@ onMounted(() => {
   transform: translateX(-400px);
 }
 </style>
+@/store/userTabClick

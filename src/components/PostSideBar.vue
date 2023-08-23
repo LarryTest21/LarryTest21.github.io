@@ -5,7 +5,6 @@ import { useRoute } from "vue-router";
 import moment from "moment";
 import $ from "jquery";
 import "jquery";
-import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 
 const route = useRoute();
@@ -21,6 +20,7 @@ const props = defineProps({
   Posts: Array,
 });
 
+
 const sideBarPosts = ref(props.Posts) as any;
 const sideBarPostsFiltered = ref([]) as any;
 const postSlug = ref(props.Slug);
@@ -31,6 +31,8 @@ postSlug.value = props.Slug;
 sideBarPosts.value = sideBarPosts.value.filter(
     (item) => item.postID !== props.Slug,
   );
+
+  sideBarPosts.value = sideBarPosts.value.slice(0,3)
 
 </script>
 

@@ -2,7 +2,7 @@
 import { ref, onBeforeMount } from "vue";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
-import db from "../firebase/firebaseInit";
+import db from "@/firebase/firebaseInit";
 import {
   collection,
   doc,
@@ -72,6 +72,7 @@ onBeforeMount(() => {
   position: absolute;
   margin: 20px;
 }
+
 a {
   align-self: flex-end;
   text-decoration: none;
@@ -84,15 +85,20 @@ a {
   border-radius: 18px;
   cursor: pointer;
   padding: 10px;
-  color: var(--color-nav-txt);
+  color: rgb(139, 7, 7);
   border-style: none;
   background-color: var(--color-nav-bg);
   transition: all 0.2s ease-in-out;
+  box-shadow: 2px 2px 5px 1px rgba(0, 0, 0, 0.3);
+
 }
+
 a:hover {
-  color: var(--color-nav-bg);
-  background-color: var(--color-nav-txt);
+  color: rgb(243, 243, 243);
+  background-color: rgb(172, 83, 83);
+  ;
 }
+
 a:active {
   box-shadow: -1px -1px 1px 0.5px rgba(0, 0, 0, 0.3);
 }
@@ -117,7 +123,9 @@ a:active {
     background-color: rgb(139, 7, 7);
     border-radius: 15px 15px 0 0;
     color: var(--color-nav-bg);
+    height: 90px;
   }
+
   .posts-inner {
     display: flex;
     flex-direction: column;
@@ -130,24 +138,23 @@ a:active {
       width: 100%;
       height: 100%;
       border-radius: 7px;
-      background: linear-gradient(
-          100deg,
+      background: linear-gradient(100deg,
           rgba(255, 255, 255, 0) 40%,
           rgba(255, 255, 255, 0.384) 50%,
-          rgba(255, 255, 255, 0) 60%
-        )
-        #c7c7c7;
+          rgba(255, 255, 255, 0) 60%) #c7c7c7;
       background-size: 200% 100%;
       background-position-x: 180%;
       animation: 0.8s loading ease-in-out infinite;
     }
   }
+
   .count {
     position: relative;
     width: 30%;
     height: 100%;
     display: flex;
     justify-content: center;
+
     p {
       height: 100%;
       display: flex;
@@ -166,12 +173,14 @@ a:active {
     display: flex;
     align-items: center;
   }
+
   .blog-posts {
     position: relative;
     width: 100%;
     display: flex;
     gap: 50px;
   }
+
   .news-posts {
     position: relative;
     width: 100%;
@@ -189,5 +198,4 @@ a:active {
 .skeleton-enter-from,
 .skeleton-leave-to {
   opacity: 0;
-}
-</style>
+}</style>

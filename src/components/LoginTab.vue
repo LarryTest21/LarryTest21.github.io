@@ -23,6 +23,13 @@ const modalButtonShow = ref(false);
 const modalAnimation = ref(false);
 const error = ref(false);
 const loggedIn = ref(false);
+const signedInCheck = signedIn();
+
+const emit = defineEmits(["emitRegister"]);
+
+const emitRegister = () => {
+  emit("emitRegister", true);
+}
 
 const signIn = () => {
   modalButtonMessage.value = "";
@@ -35,9 +42,7 @@ const signIn = () => {
     .signInWithEmailAndPassword(email.value, password.value)
     .then(() => {
       firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-      const signedInCheck = signedIn();
-      const { signedInTrue } = signedInCheck;
-      signedInTrue();
+      signedInCheck.state = true
       loggedIn.value = true;
       localStorage.setItem("isLoggedIn", JSON.stringify(loggedIn.value));
       localStorage.setItem("loggedInBefore", "true");
@@ -61,7 +66,6 @@ const signIn = () => {
 };
 
 onMounted(() => {
-  console.log(inputEmail);
   setTimeout(() => {
     inputEmail.value.focus();
   }, 300);
@@ -107,7 +111,7 @@ onMounted(() => {
         <input type="button" value="LogIn" @click.prevent="signIn" />
 
         <RouterLink to="/register">
-          <input type="button" value="Register" />
+          <input type="button" value="Register" @click="emitRegister" />
         </RouterLink>
       </div>
     </div>
@@ -126,7 +130,7 @@ position:absolute;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  box-shadow: 4px 4px 10px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 4px 4px 5px 2px rgba(0, 0, 0, 0.3);
   align-items: center;
   background: var(--color-nav-bg);
   border-radius: 5px;
