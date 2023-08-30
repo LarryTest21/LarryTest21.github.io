@@ -23,6 +23,7 @@ const notificationArray = ref([]) as any
 const notifCounter = ref(0)
 const isActivated = ref()
 const showNotif = ref(false)
+
 watch(notificationArray.value, (newValue) => {
   if (!isActivated.value) {
     notifCounter.value = notificationArray.value.length + 1
@@ -153,7 +154,6 @@ watch(signedInCheck, (newValue) => {
 });
 
 //WEATHER
-const onMountApp = ref(false);
 const time = ref([] as unknown as number | string);
 const weatherHov = ref(false);
 const timeWeatherUp = ref(false);
@@ -208,9 +208,14 @@ const weatherUnHovered = () => {
 const userDisplayName = ref()
 const navRef = ref();
 const UserTabHeight = ref();
-//START ON MOUNT
+
+
+
+
+
+
+
 onMounted(() => {
-  onMountApp.value = true;
   getWeather2();
   timeCurrent();
   loginActivated.value = JSON.parse(localStorage.getItem("loggedInBefore")!);
@@ -363,7 +368,7 @@ const notifClicked = (value) => {
             @emitRegister="activateLoginTab = !activateLoginTab" />
         </transition>
         <transition name="userTab">
-          <UserTab ref="UserTabHeight" v-if="signedInCheck.state && userTabClicked.state" @notifClicked="notifClicked"
+          <UserTab class="usertab" ref="UserTabHeight" v-if="signedInCheck.state && userTabClicked.state" @notifClicked="notifClicked"
             v-click-away="closeProfileTab" :isAdminCheck="isAdminCheck.state" :notifCounter="notifCounter"
             :notificationArray="notificationArray" :isActivated="isActivated" />
         </transition>
@@ -412,7 +417,7 @@ const notifClicked = (value) => {
           text-transform: uppercase;
           font-family: Chango;
           padding: 0 2rem;
-          transition: font 0.1s, background-color 0.3s, box-shadow 0.1s;
+          transition: font 0.1s, background-color 0.3s;
           overflow: hidden;
 
           li {
@@ -468,7 +473,6 @@ const notifClicked = (value) => {
         a:nth-child(2).router-link-exact-active::after {
           height: 0;
           width: 0;
-          box-shadow: 0px 0px 0px 0px;
         }
 
         a:nth-child(2):hover::after {
@@ -604,6 +608,7 @@ const notifClicked = (value) => {
             padding: 2px;
           }
         }
+       
       }
     }
   }
@@ -819,7 +824,6 @@ const notifClicked = (value) => {
 .fadeLogin-enter-active,
 .fadeLogin-leave-active {
   transform: translateY(0px);
-  overflow: hidden;
   transition: transform 0.3s;
 }
 
@@ -832,7 +836,6 @@ const notifClicked = (value) => {
 .userTab-leave-active {
   transform: translateY(0px);
   opacity: 1;
-  overflow: hidden;
   transition: transform 0.3s;
 }
 

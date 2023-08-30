@@ -118,10 +118,10 @@ checkPFP();
 var userStore = firebase.firestore().collection("users").doc(firebase.auth().currentUser!.uid);
 userStore.get().then((user) => {
 
-var userPic = user.data()!
-console.log(userPic.displayName);
-displayName.value = userPic.displayName;
-userEmail.value = userPic.email;
+  var userPic = user.data()!
+  console.log(userPic.displayName);
+  displayName.value = userPic.displayName;
+  userEmail.value = userPic.email;
 
 })
 
@@ -244,7 +244,6 @@ watch(() => props.isActivated, (newValue) => {
       font-size: 1.4rem;
       overflow: hidden;
       border-radius: 3px;
-      box-shadow: 4px 4px 5px 2px rgba(0, 0, 0, 0.3);
 
       .notifications {
         display: flex;
@@ -292,8 +291,7 @@ watch(() => props.isActivated, (newValue) => {
       background-color: var(--color-nav-bg);
       border-radius: 5px;
       z-index: 10;
-      box-shadow: 4px 4px 5px 2px rgba(0, 0, 0, 0.3);
-      ;
+      box-shadow: 4px 8px 5px 0px rgba(0, 0, 0, 0.3);
 
       .usertab-top {
         width: 100%;
@@ -350,7 +348,6 @@ watch(() => props.isActivated, (newValue) => {
               height: 40px;
               color: var(--color-nav-txt) !important;
               border-style: none;
-              box-shadow: 2px 2px 5px 1px rgba(0, 0, 0, 0.3);
               background-color: var(--color-nav-bg);
               transition: all 0.1s ease-in-out;
 
@@ -520,7 +517,7 @@ watch(() => props.isActivated, (newValue) => {
         text-transform: uppercase;
         font-family: Chango;
         padding: 0 1rem;
-        transition: font 0.1s, background-color 0.3s, box-shadow 0.1s;
+        transition: font 0.1s, background-color 0.3s;
         padding: 10px;
         height: 100%;
         color: var(--color-nav-txt);
@@ -532,12 +529,6 @@ watch(() => props.isActivated, (newValue) => {
         cursor: pointer;
 
       }
-
-      a::after {
-        box-shadow: none;
-      }
-
-
     }
   }
 }
